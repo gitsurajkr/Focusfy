@@ -22,17 +22,17 @@ class SchedulerService {
 
   private async checkPendingNotifications() {
     try {
+      console.log('🔍 Checking for pending notifications...');
       const now = new Date();
       const tasks = await prisma.task.findMany({
         where: {
           completed: false,
           OR: [
-            // Event tasks with due dates
+            // Event tasks with due dates (include past and future dates)
             {
               type: 'EVENT',
               due_date: {
-                not: null,
-                gte: now
+                not: null
               }
             },
             // Habit tasks with intervals
@@ -53,6 +53,7 @@ class SchedulerService {
         }
       });
 
+      console.log(`📋 Found ${tasks.length} tasks to process`);
       for (const task of tasks) {
         await this.processTask(task);
       }
@@ -80,13 +81,21 @@ class SchedulerService {
     const dueDate = new Date(task.due_date);
     const minutesUntilDue = Math.floor((dueDate.getTime() - now.getTime()) / (1000 * 60));
 
+    console.log(`📅 Processing EVENT: "${task.title}"`);
+    console.log(`   Current time: ${now.toLocaleString()}`);
+    console.log(`   Due date: ${dueDate.toLocaleString()}`);
+    console.log(`   Minutes until due: ${minutesUntilDue}`);
+    console.log(`   Reminder before: ${task.reminder_before} minutes`);
+
     // Check if we should send a "reminder_before" notification
     if (task.reminder_before && minutesUntilDue <= task.reminder_before && minutesUntilDue > 0) {
+      console.log(`⏰ Task "${task.title}" needs reminder (${minutesUntilDue}min until due)`);
       const lastNotified = await this.getLastNotificationTime(task.id, 'reminder_before');
       const shouldNotify = !lastNotified || 
         (now.getTime() - lastNotified.getTime()) >= (task.reminder_every || 10) * 60 * 1000;
 
       if (shouldNotify) {
+        console.log(`📤 Sending reminder for "${task.title}"`);
         const message = NotificationService.getEventReminder(task.title, minutesUntilDue);
         
         await NotificationService.sendNotification({
@@ -97,14 +106,18 @@ class SchedulerService {
         });
 
         await this.updateLastNotificationTime(task.id, 'reminder_before');
+      } else {
+        console.log(`⏳ Skipping reminder for "${task.title}" (too soon since last notification)`);
       }
     }
 
     // Check if the event has started (overdue notification)
     if (minutesUntilDue <= 0 && minutesUntilDue >= -5) {
+      console.log(`🚨 Task "${task.title}" is overdue by ${Math.abs(minutesUntilDue)} minutes`);
       const lastNotified = await this.getLastNotificationTime(task.id, 'started');
       
       if (!lastNotified) {
+        console.log(`📤 Sending overdue notification for "${task.title}"`);
         const message = `🚨 EVENT STARTED: "${task.title}" has begun! Time to take action! 🎯`;
         
         await NotificationService.sendNotification({
@@ -115,6 +128,8 @@ class SchedulerService {
         });
 
         await this.updateLastNotificationTime(task.id, 'started');
+      } else {
+        console.log(`⏳ Skipping overdue notification for "${task.title}" (already sent)`);
       }
     }
   }
@@ -123,10 +138,13 @@ class SchedulerService {
     const now = new Date();
     const lastNotified = await this.getLastNotificationTime(task.id, 'habit_reminder');
     
+    console.log(`🔄 Processing HABIT: "${task.title}" - Interval: ${task.repeat_interval} minutes`);
+    
     const shouldNotify = !lastNotified || 
       (now.getTime() - lastNotified.getTime()) >= task.repeat_interval * 60 * 1000;
 
     if (shouldNotify) {
+      console.log(`📤 Sending habit reminder for "${task.title}"`);
       const message = NotificationService.getHabitReminder(task.title);
       
       await NotificationService.sendNotification({
@@ -137,6 +155,9 @@ class SchedulerService {
       });
 
       await this.updateLastNotificationTime(task.id, 'habit_reminder');
+    } else {
+      const minutesSinceLastNotification = Math.floor((now.getTime() - lastNotified!.getTime()) / (1000 * 60));
+      console.log(`⏳ Skipping habit reminder for "${task.title}" (${minutesSinceLastNotification}min since last, need ${task.repeat_interval}min)`);
     }
   }
 
@@ -144,10 +165,13 @@ class SchedulerService {
     const now = new Date();
     const lastNotified = await this.getLastNotificationTime(task.id, 'normal_reminder');
     
+    console.log(`📋 Processing NORMAL: "${task.title}" - Reminder every: ${task.reminder_every} minutes`);
+    
     const shouldNotify = !lastNotified || 
       (now.getTime() - lastNotified.getTime()) >= task.reminder_every * 60 * 1000;
 
     if (shouldNotify) {
+      console.log(`📤 Sending normal task reminder for "${task.title}"`);
       const message = NotificationService.getNormalTaskReminder(task.title);
       
       await NotificationService.sendNotification({
@@ -158,6 +182,9 @@ class SchedulerService {
       });
 
       await this.updateLastNotificationTime(task.id, 'normal_reminder');
+    } else {
+      const minutesSinceLastNotification = Math.floor((now.getTime() - lastNotified!.getTime()) / (1000 * 60));
+      console.log(`⏳ Skipping normal task reminder for "${task.title}" (${minutesSinceLastNotification}min since last, need ${task.reminder_every}min)`);
     }
   }
 
