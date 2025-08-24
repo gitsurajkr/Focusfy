@@ -22,7 +22,7 @@ export default function TaskForm({ onTaskCreated }: TaskFormProps) {
     e.preventDefault();
     
     if (!formData.title.trim()) return;
-
+    const BACKEND_API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:3001';
     try {
       const taskData = {
         title: formData.title,
@@ -35,7 +35,7 @@ export default function TaskForm({ onTaskCreated }: TaskFormProps) {
         channel: formData.channel,
       };
 
-      const response = await fetch('http://localhost:3001/api/add-task', {
+      const response = await fetch(`${BACKEND_API_URL}/api/add-task`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

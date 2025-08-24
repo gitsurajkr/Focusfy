@@ -1,5 +1,6 @@
 'use client';
 
+import { babelIncludeRegexes } from 'next/dist/build/webpack-config';
 import { useState } from 'react';
 
 interface Note {
@@ -23,6 +24,9 @@ export default function NotesSection({ notes, onNotesUpdate }: NotesSectionProps
     content: '',
   });
 
+  const BACKEND_API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:3001';
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -37,7 +41,7 @@ export default function NotesSection({ notes, onNotesUpdate }: NotesSectionProps
       let response;
       if (editingNote) {
         // Update existing note
-        response = await fetch(`http://localhost:3001/api/update-notes/${editingNote.id}`, {
+        response = await fetch(`${BACKEND_API_URL}/api/update-notes/${editingNote.id}`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -46,7 +50,7 @@ export default function NotesSection({ notes, onNotesUpdate }: NotesSectionProps
         });
       } else {
         // Create new note
-        response = await fetch('http://localhost:3001/api/add-notes', {
+        response = await fetch(`${BACKEND_API_URL}/api/add-notes`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -78,7 +82,7 @@ export default function NotesSection({ notes, onNotesUpdate }: NotesSectionProps
   const deleteNote = async (noteId: string) => {
     if (window.confirm('Are you sure you want to delete this note?')) {
       try {
-        const response = await fetch(`http://localhost:3001/api/delete-notes/${noteId}`, {
+        const response = await fetch(`${BACKEND_API_URL}/api/delete-notes/${noteId}`, {
           method: 'DELETE',
         });
 

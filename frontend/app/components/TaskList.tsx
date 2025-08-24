@@ -24,7 +24,7 @@ interface TaskListProps {
 
 export default function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
   const [filter, setFilter] = useState<'ALL' | 'EVENT' | 'HABIT' | 'NORMAL' | 'COMPLETED'>('ALL');
-
+  const BACKEND_API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:3001';
   const getTaskIcon = (type: string) => {
     switch (type) {
       case 'EVENT':
@@ -45,7 +45,7 @@ export default function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
 
   const toggleTaskComplete = async (task: Task) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/update-task/${task.id}`, {
+      const response = await fetch(`${BACKEND_API_URL}/api/update-task/${task.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ export default function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
   const deleteTask = async (taskId: string) => {
     if (window.confirm('Are you sure you want to delete this quest?')) {
       try {
-        const response = await fetch(`http://localhost:3001/api/delete-task/${taskId}`, {
+        const response = await fetch(`${BACKEND_API_URL}/api/delete-task/${taskId}`, {
           method: 'DELETE',
         });
 

@@ -14,7 +14,7 @@ export default function HealthCheck({}: HealthCheckProps) {
     database: 'checking', 
     notifications: 'checking'
   });
-
+  const BACKEND_API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:3001';
   const checkHealth = async () => {
     setStatus({
       backend: 'checking',
@@ -24,12 +24,12 @@ export default function HealthCheck({}: HealthCheckProps) {
 
     try {
       // Check backend health
-      const healthResponse = await fetch('http://localhost:3001/health');
+      const healthResponse = await fetch(`${BACKEND_API_URL}/health`);
       if (healthResponse.ok) {
         setStatus(prev => ({ ...prev, backend: 'online' }));
         
         // Check if we can get tasks (database test)
-        const tasksResponse = await fetch('http://localhost:3001/api/get-tasks');
+        const tasksResponse = await fetch(`${BACKEND_API_URL}/api/get-tasks`);
         if (tasksResponse.ok) {
           setStatus(prev => ({ ...prev, database: 'online' }));
         } else {
@@ -37,7 +37,7 @@ export default function HealthCheck({}: HealthCheckProps) {
         }
 
         // Check notification configuration
-        const schedulerResponse = await fetch('http://localhost:3001/api/scheduler-status');
+        const schedulerResponse = await fetch(`${BACKEND_API_URL}/api/scheduler-status`);
         if (schedulerResponse.ok) {
           const data = await schedulerResponse.json();
           if (data.isRunning) {

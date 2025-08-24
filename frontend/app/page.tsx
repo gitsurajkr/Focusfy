@@ -19,9 +19,11 @@ export default function Home() {
     fetchNotes();
   }, []);
 
+  const BACKEND_API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:3001';
+
   const fetchTasks = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/get-tasks');
+      const response = await fetch(`${BACKEND_API_URL}/api/get-tasks`);
       if (response.ok) {
         const data = await response.json();
         setTasks(data);
@@ -33,7 +35,7 @@ export default function Home() {
 
   const fetchNotes = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/get-notes');
+      const response = await fetch(`${BACKEND_API_URL}/api/get-notes`);
       if (response.ok) {
         const data = await response.json();
         setNotes(data);

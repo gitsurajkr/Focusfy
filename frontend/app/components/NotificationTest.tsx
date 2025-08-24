@@ -10,13 +10,13 @@ export default function NotificationTest({ tasks }: NotificationTestProps) {
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<string | null>(null);
     const [schedulerStatus, setSchedulerStatus] = useState<any>(null);
-
+    const BACKEND_API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:3001';
     const testNotification = async (taskId: string) => {
         setLoading(true);
         setResult(null);
 
         try {
-            const response = await fetch(`http://localhost:3001/api/test-notification/${taskId}`, {
+            const response = await fetch(`${BACKEND_API_URL}/api/test-notification/${taskId}`, {
                 method: 'POST',
             });
 
@@ -36,7 +36,7 @@ export default function NotificationTest({ tasks }: NotificationTestProps) {
 
     const checkSchedulerStatus = async () => {
         try {
-            const response = await fetch('http://localhost:3001/api/scheduler-status');
+            const response = await fetch(`${BACKEND_API_URL}/api/scheduler-status`);
             const data = await response.json();
             setSchedulerStatus(data);
         } catch (error) {
