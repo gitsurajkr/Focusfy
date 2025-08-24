@@ -90,12 +90,12 @@ export default function TaskForm({ onTaskCreated }: TaskFormProps) {
         <label className="block text-xs mb-2"> Quest Type:</label>
         <select
           value={formData.type}
-          onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as any }))}
+          onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as 'EVENT' | 'HABIT' | 'NORMAL' }))}
           className="minecraft-input w-full"
         >
           <option value="NORMAL">Normal Quest</option>
           <option value="EVENT">Timed Event</option>
-          <option value="HABIT"> Daily Habit</option>
+          <option value="HABIT">Daily Habit</option>
         </select>
       </div>
 

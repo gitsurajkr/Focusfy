@@ -3,13 +3,23 @@
 import { useState } from 'react';
 
 interface NotificationTestProps {
-    tasks: any[];
+    tasks: {
+        id: string;
+        title: string;
+        type: string;
+        channel: string[];
+    }[];
 }
 
 export default function NotificationTest({ tasks }: NotificationTestProps) {
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<string | null>(null);
-    const [schedulerStatus, setSchedulerStatus] = useState<any>(null);
+    const [schedulerStatus, setSchedulerStatus] = useState<{
+        isRunning: boolean;
+        activeJobs: number;
+        cacheSize: number;
+        lastCheck: string;
+    } | null>(null);
     const BACKEND_API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:3001';
     const testNotification = async (taskId: string) => {
         setLoading(true);
@@ -25,10 +35,14 @@ export default function NotificationTest({ tasks }: NotificationTestProps) {
             if (response.ok) {
                 setResult(`✅ ${data.message}`);
             } else {
-                setResult(`❌ ${data.error}`);
+                setResult(` ${data.error}`);
             }
-        } catch (error: any) {
-            setResult(`❌ Error: ${error?.message || 'Unknown error'}`);
+        } catch (error) {
+            if (error instanceof Error) {
+            setResult(` Error: ${error.message}`);
+            } else {
+            setResult(' Error: Unknown error');
+            }
         } finally {
             setLoading(false);
         }

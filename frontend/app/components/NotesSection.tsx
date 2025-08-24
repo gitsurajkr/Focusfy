@@ -1,6 +1,5 @@
 'use client';
 
-import { babelIncludeRegexes } from 'next/dist/build/webpack-config';
 import { useState } from 'react';
 
 interface Note {

@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from 'react';
 
-interface HealthCheckProps {}
-
-export default function HealthCheck({}: HealthCheckProps) {
+export default function HealthCheck() {
   const [status, setStatus] = useState<{
     backend: 'checking' | 'online' | 'offline';
     database: 'checking' | 'online' | 'offline';
@@ -39,7 +37,7 @@ export default function HealthCheck({}: HealthCheckProps) {
         // Check notification configuration
         const schedulerResponse = await fetch(`${BACKEND_API_URL}/api/scheduler-status`);
         if (schedulerResponse.ok) {
-          const data = await schedulerResponse.json();
+          const data: { isRunning: boolean } = await schedulerResponse.json();
           if (data.isRunning) {
             setStatus(prev => ({ ...prev, notifications: 'configured' }));
           } else {
@@ -56,7 +54,7 @@ export default function HealthCheck({}: HealthCheckProps) {
           notifications: 'disabled'
         }));
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Health check failed:', error);
       setStatus({
         backend: 'offline',
@@ -71,8 +69,8 @@ export default function HealthCheck({}: HealthCheckProps) {
     checkHealth();
   }, []);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
+  const getStatusColor = (statusValue: string) => {
+    switch (statusValue) {
       case 'online':
       case 'configured': return 'task-habit'; // green
       case 'partial': return 'task-normal'; // blue
@@ -83,8 +81,8 @@ export default function HealthCheck({}: HealthCheckProps) {
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
+  const getStatusText = (statusValue: string) => {
+    switch (statusValue) {
       case 'online': return '✅ Online';
       case 'configured': return '✅ Active';
       case 'partial': return '⚠️ Partial';

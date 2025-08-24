@@ -106,23 +106,23 @@ export default function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
       {/* Filter Buttons */}
       <div className="mb-6 flex flex-wrap gap-2">
         {['ALL', 'EVENT', 'HABIT', 'NORMAL', 'COMPLETED'].map((filterType) => (
-          <button
+            <button
             key={filterType}
-            onClick={() => setFilter(filterType as any)}
+            onClick={() => setFilter(filterType as typeof filter)}
             className={`minecraft-btn text-xs ${
               filter === filterType 
-                ? filterType === 'EVENT' 
-                  ? 'task-event'
-                  : filterType === 'HABIT'
-                  ? 'task-habit'
-                  : filterType === 'NORMAL'
-                  ? 'task-normal'
-                  : 'task-completed'
-                : ''
+              ? filterType === 'EVENT' 
+                ? 'task-event'
+                : filterType === 'HABIT'
+                ? 'task-habit'
+                : filterType === 'NORMAL'
+                ? 'task-normal'
+                : 'task-completed'
+              : ''
             }`}
-          >
+            >
             {filterType}
-          </button>
+            </button>
         ))}
       </div>
 

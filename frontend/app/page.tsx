@@ -147,7 +147,7 @@ export default function Home() {
             
           </div>
           <div className="text-xs text-white opacity-60 mt-2">
-            <span>"The way to get started is to quit talking and begin doing." - Steve</span>
+            <span>&quot;The way to get started is to quit talking and begin doing.&quot; - Steve</span>
           </div>
         </div>
       </footer>
