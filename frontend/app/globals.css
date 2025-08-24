@@ -1,0 +1,189 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import "tailwindcss";
+
+/* Minecraft-themed CSS Variables */
+:root {
+  --minecraft-brown: #8B4513;
+  --minecraft-dark-brown: #654321;
+  --minecraft-light-brown: #D2B48C;
+  --minecraft-green: #228B22;
+  --minecraft-dark-green: #006400;
+  --minecraft-blue: #4169E1;
+  --minecraft-red: #DC143C;
+  --minecraft-yellow: #FFD700;
+  --minecraft-orange: #FF8C00;
+  --minecraft-gray: #696969;
+  --minecraft-light-gray: #D3D3D3;
+  --minecraft-black: #2F2F2F;
+  --minecraft-white: #F5F5DC;
+}
+
+/* Global Styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Press Start 2P', cursive;
+  background: linear-gradient(45deg, #87CEEB 0%, #98FB98 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* Minecraft-style container */
+.minecraft-container {
+  background: var(--minecraft-brown);
+  border: 4px solid var(--minecraft-dark-brown);
+  box-shadow: 
+    inset -2px -2px var(--minecraft-dark-brown),
+    inset 2px 2px var(--minecraft-light-brown),
+    4px 4px 0px rgba(0, 0, 0, 0.3);
+  image-rendering: pixelated;
+}
+
+/* Minecraft-style button */
+.minecraft-btn {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 10px;
+  padding: 8px 16px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+  text-decoration: none;
+  background: var(--minecraft-gray);
+  border: 2px solid var(--minecraft-light-gray);
+  box-shadow: 
+    inset -1px -1px var(--minecraft-black),
+    inset 1px 1px var(--minecraft-white),
+    2px 2px 0px rgba(0, 0, 0, 0.3);
+  transition: all 0.1s;
+}
+
+.minecraft-btn:hover {
+  background: var(--minecraft-light-gray);
+  transform: translate(1px, 1px);
+  box-shadow: 
+    inset -1px -1px var(--minecraft-black),
+    inset 1px 1px var(--minecraft-white),
+    1px 1px 0px rgba(0, 0, 0, 0.3);
+}
+
+.minecraft-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 
+    inset 1px 1px var(--minecraft-black),
+    inset -1px -1px var(--minecraft-white);
+}
+
+/* Minecraft-style input */
+.minecraft-input {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 10px;
+  padding: 8px;
+  background: var(--minecraft-white);
+  border: 2px solid var(--minecraft-black);
+  box-shadow: 
+    inset 2px 2px var(--minecraft-gray),
+    inset -2px -2px var(--minecraft-light-gray);
+  outline: none;
+}
+
+.minecraft-input:focus {
+  background: #FFFACD;
+  box-shadow: 
+    inset 2px 2px var(--minecraft-blue),
+    inset -2px -2px var(--minecraft-light-gray);
+}
+
+/* Task type colors */
+.task-event {
+  background: var(--minecraft-red) !important;
+  border-color: #8B0000 !important;
+}
+
+.task-habit {
+  background: var(--minecraft-green) !important;
+  border-color: var(--minecraft-dark-green) !important;
+}
+
+.task-normal {
+  background: var(--minecraft-blue) !important;
+  border-color: #000080 !important;
+}
+
+/* Completed task styling */
+.task-completed {
+  opacity: 0.6;
+  text-decoration: line-through;
+  background: var(--minecraft-gray) !important;
+}
+
+/* Minecraft-style card */
+.minecraft-card {
+  background: var(--minecraft-light-brown);
+  border: 3px solid var(--minecraft-brown);
+  box-shadow: 
+    inset -2px -2px var(--minecraft-dark-brown),
+    inset 2px 2px var(--minecraft-white),
+    3px 3px 0px rgba(0, 0, 0, 0.3);
+  padding: 16px;
+  margin: 8px;
+}
+
+/* Pixel art icons using CSS */
+.pixel-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  image-rendering: pixelated;
+  background-size: contain;
+}
+
+.icon-pickaxe {
+  background: linear-gradient(45deg, var(--minecraft-brown) 30%, var(--minecraft-gray) 70%);
+  border: 1px solid var(--minecraft-black);
+}
+
+.icon-sword {
+  background: linear-gradient(to bottom, var(--minecraft-gray) 60%, var(--minecraft-brown) 40%);
+  border: 1px solid var(--minecraft-black);
+}
+
+.icon-book {
+  background: var(--minecraft-green);
+  border: 1px solid var(--minecraft-dark-green);
+}
+
+/* Animation for task completion */
+@keyframes minecraft-complete {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.task-complete-animation {
+  animation: minecraft-complete 0.3s ease-in-out;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  body {
+    font-size: 10px;
+  }
+  
+  .minecraft-btn {
+    font-size: 8px;
+    padding: 6px 12px;
+  }
+  
+  .minecraft-input {
+    font-size: 8px;
+    padding: 6px;
+  }
+}
+

@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Task {
+  id              String    @id @default(uuid())
+  title           String
+  type            Type      @default(NORMAL)
+  tags            String[]
+  due_date        DateTime?       // for EVENT / NORMAL
+  repeat_interval Int?            // minutes (for HABIT, e.g., 180 = 3h)
+  reminder_before Int?            // minutes before due_date (for EVENT, e.g., 30)
+  reminder_every  Int?            // repeat interval before due_date (for EVENT, e.g., 10)
+  channel         String[]        // ["telegram", "discord"]
+  completed       Boolean   @default(false)
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+}
+
+model Notes {
+  id         String   @id @default(uuid())
+  title      String?
+  content    String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+enum Type {
+  EVENT
+  HABIT
+  NORMAL
+}
+
+
+// {
+//   "title": "Codeforces Contest",
+//   "type": "EVENT",
+//   "due_date": "2025-08-25T20:00:00Z",
+//   "reminder_before": 30,
+//   "reminder_every": 10,
+//   "channel": ["telegram"]
+// }
+
+// {
+//   "title": "Study AIML",
+//   "type": "NORMAL",
+//   "tags": ["study", "ml"],
+//   "reminder_every": "3h",
+//   "channel": ["telegram", "discord"]
+// }
+
+
+// Notification Examples
+
+// For EVENT (contest):
+// "Reminder: Codeforces contest starts in 30 mins!"
+// → Sent every 10 mins until start.
+
+// For NORMAL (study AIML):
+// "Reminder: Time to study AIML 📘"
+// → Sent every 3 hours.
+
+// For HABBIT (Workout):
+// "Reminder: Don’t forget your workout 💪"
+// → Sent daily at fixed time.
