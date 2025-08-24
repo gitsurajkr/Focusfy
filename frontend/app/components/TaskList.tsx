@@ -40,7 +40,29 @@ export default function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const now = new Date();
+    const isOverdue = date < now;
+    const minutesUntilDue = Math.floor((date.getTime() - now.getTime()) / (1000 * 60));
+    
+    const dateStr = date.toLocaleDateString();
+    const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    
+    if (isOverdue) {
+      const minutesOverdue = Math.abs(minutesUntilDue);
+      if (minutesOverdue < 60) {
+        return `${dateStr} ${timeStr} (${minutesOverdue}min ago)`;
+      } else {
+        const hoursOverdue = Math.floor(minutesOverdue / 60);
+        return `${dateStr} ${timeStr} (${hoursOverdue}h ago)`;
+      }
+    } else {
+      if (minutesUntilDue < 60) {
+        return `${dateStr} ${timeStr} (in ${minutesUntilDue}min)`;
+      } else {
+        const hoursUntilDue = Math.floor(minutesUntilDue / 60);
+        return `${dateStr} ${timeStr} (in ${hoursUntilDue}h)`;
+      }
+    }
   };
 
   const toggleTaskComplete = async (task: Task) => {
