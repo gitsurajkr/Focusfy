@@ -17,12 +17,12 @@ class SchedulerService {
       this.checkPendingNotifications();
     });
 
-    console.log('⏰ Scheduler service initialized');
+    console.log('Scheduler service initialized');
   }
 
   private async checkPendingNotifications() {
     try {
-      console.log('🔍 Checking for pending notifications...');
+      console.log('Checking for pending notifications...');
       const now = new Date();
       const tasks = await prisma.task.findMany({
         where: {
@@ -53,12 +53,12 @@ class SchedulerService {
         }
       });
 
-      console.log(`📋 Found ${tasks.length} tasks to process`);
+      console.log(`Found ${tasks.length} tasks to process`);
       for (const task of tasks) {
         await this.processTask(task);
       }
     } catch (error) {
-      console.error('❌ Error checking pending notifications:', error);
+      console.error('Error checking pending notifications:', error);
     }
   }
 
@@ -72,7 +72,7 @@ class SchedulerService {
         await this.handleNormalTask(task);
       }
     } catch (error) {
-      console.error(`❌ Error processing task ${task.id}:`, error);
+      console.error(`Error processing task ${task.id}:`, error);
     }
   }
 
@@ -81,7 +81,7 @@ class SchedulerService {
     const dueDate = new Date(task.due_date);
     const minutesUntilDue = Math.floor((dueDate.getTime() - now.getTime()) / (1000 * 60));
 
-    console.log(`📅 Processing EVENT: "${task.title}"`);
+    console.log(`   Processing EVENT: "${task.title}"`);
     console.log(`   Current time: ${now.toLocaleString()}`);
     console.log(`   Due date: ${dueDate.toLocaleString()}`);
     console.log(`   Minutes until due: ${minutesUntilDue}`);
@@ -89,13 +89,13 @@ class SchedulerService {
 
     // Check if we should send a "reminder_before" notification
     if (task.reminder_before && minutesUntilDue <= task.reminder_before && minutesUntilDue > 0) {
-      console.log(`⏰ Task "${task.title}" needs reminder (${minutesUntilDue}min until due)`);
+      console.log(`Task "${task.title}" needs reminder (${minutesUntilDue}min until due)`);
       const lastNotified = await this.getLastNotificationTime(task.id, 'reminder_before');
       const shouldNotify = !lastNotified || 
         (now.getTime() - lastNotified.getTime()) >= (task.reminder_every || 10) * 60 * 1000;
 
       if (shouldNotify) {
-        console.log(`📤 Sending reminder for "${task.title}"`);
+        console.log(`Sending reminder for "${task.title}"`);
         const message = NotificationService.getEventReminder(task.title, minutesUntilDue);
         
         await NotificationService.sendNotification({
@@ -113,12 +113,12 @@ class SchedulerService {
 
     // Check if the event has started (overdue notification)
     if (minutesUntilDue <= 0 && minutesUntilDue >= -5) {
-      console.log(`🚨 Task "${task.title}" is overdue by ${Math.abs(minutesUntilDue)} minutes`);
+      console.log(`Task "${task.title}" is overdue by ${Math.abs(minutesUntilDue)} minutes`);
       const lastNotified = await this.getLastNotificationTime(task.id, 'started');
       
       if (!lastNotified) {
-        console.log(`📤 Sending overdue notification for "${task.title}"`);
-        const message = `🚨 EVENT STARTED: "${task.title}" has begun! Time to take action! 🎯`;
+        console.log(`Sending overdue notification for "${task.title}"`);
+        const message = `EVENT STARTED: "${task.title}" has begun! Time to take action!`;
         
         await NotificationService.sendNotification({
           message,
@@ -129,7 +129,7 @@ class SchedulerService {
 
         await this.updateLastNotificationTime(task.id, 'started');
       } else {
-        console.log(`⏳ Skipping overdue notification for "${task.title}" (already sent)`);
+        console.log(`Skipping overdue notification for "${task.title}" (already sent)`);
       }
     }
   }
@@ -138,13 +138,13 @@ class SchedulerService {
     const now = new Date();
     const lastNotified = await this.getLastNotificationTime(task.id, 'habit_reminder');
     
-    console.log(`🔄 Processing HABIT: "${task.title}" - Interval: ${task.repeat_interval} minutes`);
+    console.log(`Processing HABIT: "${task.title}" - Interval: ${task.repeat_interval} minutes`);
     
     const shouldNotify = !lastNotified || 
       (now.getTime() - lastNotified.getTime()) >= task.repeat_interval * 60 * 1000;
 
     if (shouldNotify) {
-      console.log(`📤 Sending habit reminder for "${task.title}"`);
+      console.log(`Sending habit reminder for "${task.title}"`);
       const message = NotificationService.getHabitReminder(task.title);
       
       await NotificationService.sendNotification({
@@ -165,13 +165,13 @@ class SchedulerService {
     const now = new Date();
     const lastNotified = await this.getLastNotificationTime(task.id, 'normal_reminder');
     
-    console.log(`📋 Processing NORMAL: "${task.title}" - Reminder every: ${task.reminder_every} minutes`);
+    console.log(`Processing NORMAL: "${task.title}" - Reminder every: ${task.reminder_every} minutes`);
     
     const shouldNotify = !lastNotified || 
       (now.getTime() - lastNotified.getTime()) >= task.reminder_every * 60 * 1000;
 
     if (shouldNotify) {
-      console.log(`📤 Sending normal task reminder for "${task.title}"`);
+      console.log(`Sending normal task reminder for "${task.title}"`);
       const message = NotificationService.getNormalTaskReminder(task.title);
       
       await NotificationService.sendNotification({
@@ -214,7 +214,7 @@ class SchedulerService {
         throw new Error('Task not found');
       }
 
-      const message = `🧪 TEST: This is a test notification for "${task.title}"`;
+      const message = `TEST: This is a test notification for "${task.title}"`;
       
       await NotificationService.sendNotification({
         message,
@@ -225,7 +225,27 @@ class SchedulerService {
 
       return { success: true, message: 'Test notification sent' };
     } catch (error: any) {
-      console.error('❌ Error sending test notification:', error);
+      console.error('Error sending test notification:', error);
+      return { success: false, error: error?.message || 'Unknown error' };
+    }
+  }
+
+  // Test Gmail notification specifically
+  async testGmailNotification() {
+    try {
+      const message = `TEST: Gmail notification service is working! Sent at ${new Date().toLocaleString()}`;
+      
+      await NotificationService.sendNotification({
+        
+        message,
+        taskTitle: "Gmail Test",
+        taskType: 'NORMAL',
+        channels: ['gmail']
+      });
+
+      return { success: true, message: 'Gmail test notification sent' };
+    } catch (error: any) {
+      console.error('Error sending Gmail test notification:', error);
       return { success: false, error: error?.message || 'Unknown error' };
     }
   }

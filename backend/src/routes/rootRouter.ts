@@ -35,6 +35,19 @@ rootRouter.post('/test-notification/:taskId', async (req, res) => {
   }
 });
 
+// Test Gmail notification
+rootRouter.post('/test-gmail', async (req, res) => {
+  try {
+    const result = await SchedulerService.testGmailNotification();
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ 
+      success: false, 
+      error: error?.message || 'Unknown error' 
+    });
+  }
+});
+
 rootRouter.get('/scheduler-status', (req, res) => {
   const status = SchedulerService.getStatus();
   res.json(status);
