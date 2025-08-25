@@ -83,12 +83,12 @@ export default function HealthCheck() {
 
   const getStatusText = (statusValue: string) => {
     switch (statusValue) {
-      case 'online': return '✅ Online';
-      case 'configured': return '✅ Active';
-      case 'partial': return '⚠️ Partial';
-      case 'checking': return '⏳ Checking';
-      case 'offline': return '❌ Offline';
-      case 'disabled': return '❌ Disabled';
+      case 'online': return 'Online';
+      case 'configured': return 'Active';
+      case 'partial': return 'Partial';
+      case 'checking': return 'Checking';
+      case 'offline': return 'Offline';
+      case 'disabled': return 'Disabled';
       default: return '❓ Unknown';
     }
   };
@@ -96,12 +96,12 @@ export default function HealthCheck() {
   return (
     <div className="minecraft-card mb-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold">🔍 System Status</h3>
+        <h3 className="text-sm font-bold">System Status</h3>
         <button 
           onClick={checkHealth}
           className="minecraft-btn text-xs"
         >
-          🔄 Refresh
+          Refresh
         </button>
       </div>
       

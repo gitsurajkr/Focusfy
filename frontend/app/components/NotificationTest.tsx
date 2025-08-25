@@ -33,7 +33,7 @@ export default function NotificationTest({ tasks }: NotificationTestProps) {
             const data = await response.json();
 
             if (response.ok) {
-                setResult(`✅ ${data.message}`);
+                setResult(`${data.message}`);
             } else {
                 setResult(` ${data.error}`);
             }
@@ -58,9 +58,36 @@ export default function NotificationTest({ tasks }: NotificationTestProps) {
         }
     };
 
+    const testGmail = async () => {
+        setLoading(true);
+        setResult(null);
+
+        try {
+            const response = await fetch(`${BACKEND_API_URL}/api/test-gmail`, {
+                method: 'POST',
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setResult(`${data.message}`);
+            } else {
+                setResult(`${data.error}`);
+            }
+        } catch (error) {
+            if (error instanceof Error) {
+                setResult(`Error: ${error.message}`);
+            } else {
+                setResult('Error: Unknown error');
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="minecraft-card mb-6">
-            <h3 className="text-sm mb-4 text-center">🧪 NOTIFICATION TESTING</h3>
+            <h3 className="text-sm mb-4 text-center">NOTIFICATION TESTING</h3>
 
             {/* Scheduler Status */}
             <div className="mb-4">
@@ -73,12 +100,24 @@ export default function NotificationTest({ tasks }: NotificationTestProps) {
 
                 {schedulerStatus && (
                     <div className="minecraft-container p-3 text-xs">
-                        <div>⏰ Status: {schedulerStatus.isRunning ? 'Running' : 'Stopped'}</div>
-                        <div>🔄 Active Jobs: {schedulerStatus.activeJobs}</div>
-                        <div>💾 Cache Size: {schedulerStatus.cacheSize}</div>
-                        <div>🕐 Last Check: {new Date(schedulerStatus.lastCheck).toLocaleString()}</div>
+                        <div>Status: {schedulerStatus.isRunning ? 'Running' : 'Stopped'}</div>
+                        <div>Active Jobs: {schedulerStatus.activeJobs}</div>
+                        <div>Cache Size: {schedulerStatus.cacheSize}</div>
+                        <div>Last Check: {new Date(schedulerStatus.lastCheck).toLocaleString()}</div>
                     </div>
                 )}
+            </div>
+
+            {/* Quick Service Tests */}
+            <div className="mb-4 space-y-2">
+                <p className="text-xs font-bold">Quick Service Tests:</p>
+                <button
+                    onClick={testGmail}
+                    disabled={loading}
+                    className={`minecraft-btn text-xs w-full ${loading ? 'opacity-50' : ''}`}
+                >
+                    {loading ? 'Sending...' : 'Test Gmail'}
+                </button>
             </div>
 
             {/* Test Notifications */}
@@ -104,7 +143,7 @@ export default function NotificationTest({ tasks }: NotificationTestProps) {
                                             task.type === 'HABIT' ? 'task-habit' : 'task-normal'
                                         } ${(loading || task.channel.length === 0) ? 'opacity-50' : ''}`}
                                 >
-                                    {loading ? '⏳' : '🧪 Test'}
+                                    {loading ? 'Loading...' : 'Test'}
                                 </button>
                             </div>
                         ))}
@@ -115,7 +154,7 @@ export default function NotificationTest({ tasks }: NotificationTestProps) {
             {/* Result Display */}
             {result && (
                 <div className="minecraft-container p-3 text-xs">
-                    <strong>Result:</strong> {result}
+                    {result}
                 </div>
             )}
 

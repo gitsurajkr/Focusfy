@@ -118,7 +118,7 @@ export default function NotesSection({ notes, onNotesUpdate }: NotesSectionProps
             onClick={() => setIsCreating(true)}
             className="minecraft-btn task-habit"
           >
-            📝 NEW ADVENTURE LOG
+            NEW ADVENTURE LOG
           </button>
         </div>
       )}
@@ -165,7 +165,7 @@ export default function NotesSection({ notes, onNotesUpdate }: NotesSectionProps
                 className="minecraft-btn"
                 style={{ background: 'var(--minecraft-red)' }}
               >
-                ❌ CANCEL
+                CANCEL
               </button>
             </div>
           </form>
@@ -176,7 +176,7 @@ export default function NotesSection({ notes, onNotesUpdate }: NotesSectionProps
       <div className="space-y-4 max-h-96 overflow-y-auto">
         {sortedNotes.length === 0 ? (
           <div className="text-center minecraft-container p-6">
-            <p className="text-sm">📰 No adventure logs found!</p>
+            <p className="text-sm">No adventure logs found!</p>
             <p className="text-xs mt-2">Start documenting your journey!</p>
           </div>
         ) : (

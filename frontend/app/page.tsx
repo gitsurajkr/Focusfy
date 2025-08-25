@@ -57,18 +57,18 @@ export default function Home() {
     <div className="min-h-screen p-4">
       {/* Health Check Component */}
       {/* <HealthCheck /> */}
-      
+
       {/* Header */}
       <header className="minecraft-container mb-6 p-6 text-center">
         <h1 className="text-2xl mb-4 text-white">
-          PRODUCTIVITY MANAGER 
+          FOCUSFY PRODUCTIVITY MANAGER
         </h1>
         <div className="flex justify-center gap-4">
           <button
             onClick={() => setActiveTab('tasks')}
             className={`minecraft-btn ${activeTab === 'tasks' ? 'task-event' : ''}`}
           >
-             TASKS
+            TASKS
           </button>
           <button
             onClick={() => setActiveTab('notes')}
@@ -83,12 +83,10 @@ export default function Home() {
       <main className="max-w-6xl mx-auto">
         {activeTab === 'tasks' ? (
           <div className="space-y-6">
-            {/* Task Statistics */}
             <TaskStats tasks={tasks} />
-            
-            {/* Notification Testing (development only) */}
+
             <NotificationTest tasks={tasks} />
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Task Form */}
               <div className="lg:col-span-1">
@@ -97,7 +95,7 @@ export default function Home() {
                   <TaskForm onTaskCreated={handleTaskUpdate} />
                 </div>
               </div>
-              
+
               {/* Task List */}
               <div className="lg:col-span-2">
                 <div className="minecraft-card">
@@ -119,7 +117,7 @@ export default function Home() {
       <footer className="mt-8 text-center minecraft-container p-4">
         <div className="space-y-2">
           <p className="text-white text-xs">
-             Craft your productivity, block by block!
+            Craft your productivity, block by block!
           </p>
           <div className="flex justify-center items-center gap-4 text-xs text-white opacity-80">
             <span>⚡ Crafted by</span>
@@ -128,23 +126,23 @@ export default function Home() {
             <span> {new Date().getFullYear()}</span>
           </div>
           <div className="flex justify-center items-center gap-3 mt-2">
-            <a 
-              href="https://github.com/gitsurajkr" 
+            <a
+              href="https://github.com/gitsurajkr"
               className="minecraft-btn text-xs px-2 py-1 hover:task-normal transition-colors"
-              target="_blank" 
+              target="_blank"
               rel="noopener noreferrer"
             >
               GitHub
             </a>
-            <a 
-              href="https://surajspace.tech" 
+            <a
+              href="https://surajspace.tech"
               className="minecraft-btn text-xs px-2 py-1 hover:task-habit transition-colors"
-              target="_blank" 
+              target="_blank"
               rel="noopener noreferrer"
             >
               Portfolio
             </a>
-            
+
           </div>
           <div className="text-xs text-white opacity-60 mt-2">
             <span>&quot;The way to get started is to quit talking and begin doing.&quot; - Steve</span>
