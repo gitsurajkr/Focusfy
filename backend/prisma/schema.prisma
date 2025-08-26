@@ -25,6 +25,11 @@ model User {
   discordBotToken    String?
   discordChannelId   String?
   gmailTo            String?
+  
+  // Password reset fields
+  resetToken         String?
+  resetTokenExpires  DateTime?
+  
   tasks     Task[]
 
   notes     Notes[]

@@ -246,6 +246,90 @@ class NotificationService {
     return `⚒️ Task Reminder: Don't forget about "${taskTitle}" - Let's get it done! 🚀`;
   }
 
+  // Send password reset email
+  async sendPasswordResetEmail(email: string, resetToken: string): Promise<boolean> {
+    try {
+      if (!this.gmailTransporter) {
+        throw new Error('Gmail transporter not initialized');
+      }
+
+      const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+      
+      const subject = 'Reset Your Focusfy Password';
+      const message = `
+Hi there,
+
+You requested to reset your password for your Focusfy account. Click the link below to reset your password:
+
+${resetLink}
+
+This link will expire in 1 hour for security reasons.
+
+If you didn't request this password reset, please ignore this email. Your password will remain unchanged.
+
+Best regards,
+Focusfy Team
+      `.trim();
+
+      const htmlMessage = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #ffffff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+          <h2 style="color: #333; text-align: center; margin-bottom: 30px;">Reset Your Focusfy Password</h2>
+          
+          <p style="color: #555; font-size: 16px; line-height: 1.5; margin-bottom: 20px;">
+            Hi there,
+          </p>
+          
+          <p style="color: #555; font-size: 16px; line-height: 1.5; margin-bottom: 30px;">
+            You requested to reset your password for your Focusfy account. Click the button below to reset your password:
+          </p>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetLink}" style="background: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-size: 16px; font-weight: bold; display: inline-block;">
+              Reset Password
+            </a>
+          </div>
+          
+          <p style="color: #888; font-size: 14px; line-height: 1.5; margin-bottom: 10px;">
+            Or copy and paste this link in your browser:
+          </p>
+          <p style="color: #007bff; font-size: 14px; word-break: break-all; margin-bottom: 30px;">
+            ${resetLink}
+          </p>
+          
+          <div style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 30px;">
+            <p style="color: #888; font-size: 14px; line-height: 1.5; margin-bottom: 10px;">
+              ⚠️ This link will expire in 1 hour for security reasons.
+            </p>
+            <p style="color: #888; font-size: 14px; line-height: 1.5; margin-bottom: 20px;">
+              If you didn't request this password reset, please ignore this email. Your password will remain unchanged.
+            </p>
+          </div>
+          
+          <div style="text-align: center; margin-top: 20px;">
+            <p style="color: #999; font-size: 12px;">
+              Best regards,<br>
+              <strong>Focusfy Team</strong>
+            </p>
+          </div>
+        </div>
+      `;
+
+      await this.gmailTransporter.sendMail({
+        from: `"Focusfy Productivity" <${this.gmailUser}>`,
+        to: email,
+        subject: subject,
+        text: message,
+        html: htmlMessage
+      });
+
+      console.log('Password reset email sent to:', email);
+      return true;
+    } catch (error) {
+      console.error('Failed to send password reset email:', error);
+      return false;
+    }
+  }
+
   // Temporary fallback for old sendNotification method (scheduled notifications)
   // TODO: Implement user-specific scheduled notifications
   async sendNotification(payload: NotificationPayload): Promise<void> {
