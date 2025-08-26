@@ -1,21 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-
-interface Task {
-  id: string;
-  title: string;
-  type: 'EVENT' | 'HABIT' | 'NORMAL';
-  tags: string[];
-  due_date?: string;
-  repeat_interval?: number;
-  reminder_before?: number;
-  reminder_every?: number;
-  channel: string[];
-  completed: boolean;
-  created_at: string;
-  updated_at: string;
-}
+import { useAuth } from '../contexts/AuthContext';
+import api from '../../lib/api';
+import { showToast } from '../../lib/toast';
+import { Task, ApiError } from '../../types';
 
 interface TaskListProps {
   tasks: Task[];
@@ -23,14 +12,14 @@ interface TaskListProps {
 }
 
 export default function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
+  // const { token } = useAuth();
   const [filter, setFilter] = useState<'ALL' | 'EVENT' | 'HABIT' | 'NORMAL' | 'COMPLETED'>('ALL');
-  const BACKEND_API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'http://localhost:3001';
   const getTaskIcon = (type: string) => {
     switch (type) {
       case 'EVENT':
         return '🗓️';
       case 'HABIT':
-        return '🔄';
+        return 'In Progress';
       case 'NORMAL':
         return '⚒️';
       default:
@@ -67,37 +56,36 @@ export default function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
 
   const toggleTaskComplete = async (task: Task) => {
     try {
-      const response = await fetch(`${BACKEND_API_URL}/api/update-task/${task.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...task,
-          completed: !task.completed,
-        }),
+      await api.patch(`/api/update-task/${task.id}`, {
+        ...task,
+        completed: !task.completed,
       });
-
-      if (response.ok) {
-        onTaskUpdate();
-      }
+      
+      const statusMessage = !task.completed 
+        ? `Quest "${task.title}" completed!` 
+        : `Quest "${task.title}" marked as incomplete`;
+      showToast.success(statusMessage);
+      onTaskUpdate();
     } catch (error) {
-      console.error('Error updating task:', error);
+      const apiError = error as ApiError;
+      const errorMessage = apiError.response?.data?.error || 'Failed to update quest';
+      showToast.error(`Failed to update quest: ${errorMessage}`);
+      console.error('Error updating task:', apiError);
     }
   };
 
   const deleteTask = async (taskId: string) => {
     if (window.confirm('Are you sure you want to delete this quest?')) {
+      const loadingToastId = showToast.loading('Deleting quest...');
       try {
-        const response = await fetch(`${BACKEND_API_URL}/api/delete-task/${taskId}`, {
-          method: 'DELETE',
-        });
-
-        if (response.ok) {
-          onTaskUpdate();
-        }
+        await api.delete(`/api/delete-task/${taskId}`);
+        showToast.update(loadingToastId, 'Quest deleted successfully!', 'success');
+        onTaskUpdate();
       } catch (error) {
-        console.error('Error deleting task:', error);
+        const apiError = error as ApiError;
+        const errorMessage = apiError.response?.data?.error || 'Failed to delete quest';
+        showToast.update(loadingToastId, `Failed to delete quest: ${errorMessage}`, 'error');
+        console.error('Error deleting task:', apiError);
       }
     }
   };
@@ -131,15 +119,15 @@ export default function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
             <button
             key={filterType}
             onClick={() => setFilter(filterType as typeof filter)}
-            className={`minecraft-btn text-xs ${
+            className={`px-3 py-1 rounded pixel-border pixel-font text-xs bg-gradient-to-r from-blue-600 to-purple-600 hover:from-cyan-400 hover:to-blue-500 transition-all ${
               filter === filterType 
               ? filterType === 'EVENT' 
-                ? 'task-event'
+                ? 'bg-gradient-to-r from-pink-500 to-red-500 border-pink-400 shadow-pink-500/25'
                 : filterType === 'HABIT'
-                ? 'task-habit'
+                ? 'bg-gradient-to-r from-green-500 to-emerald-500 border-green-400 shadow-green-500/25'
                 : filterType === 'NORMAL'
-                ? 'task-normal'
-                : 'task-completed'
+                ? 'bg-gradient-to-r from-blue-600 to-purple-600 border-blue-400 shadow-blue-500/25'
+                : 'bg-gradient-to-r from-gray-700 to-gray-900 border-gray-500 shadow-gray-500/25'
               : ''
             }`}
             >
@@ -150,7 +138,7 @@ export default function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
 
       {/* Task Count */}
       <div className="mb-4 text-center">
-        <span className="minecraft-container p-2 text-xs text-gray-300">
+        <span className="pixel-border pixel-font p-2 text-xs text-gray-300 bg-[#232946]/80">
           {filteredTasks.length} Quest{filteredTasks.length !== 1 ? 's' : ''}
         </span>
       </div>
@@ -158,46 +146,36 @@ export default function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
       {/* Tasks */}
       <div className="space-y-3 max-h-96 overflow-y-auto">
         {sortedTasks.length === 0 ? (
-          <div className="text-center minecraft-container p-6">
-            <p className="text-sm"> No quests found!</p>
+          <div className="text-center pixel-border bg-[#181825]/80 p-6">
+            <p className="text-sm pixel-font"> No quests found!</p>
             <p className="text-xs mt-2">Start your adventure by creating a new task!</p>
           </div>
         ) : (
           sortedTasks.map((task) => (
             <div
               key={task.id}
-              className={`minecraft-card ${
-                task.type === 'EVENT'
-                  ? 'task-event'
-                  : task.type === 'HABIT'
-                  ? 'task-habit'
-                  : 'task-normal'
-              } ${task.completed ? 'task-completed' : ''}`}
+              className={`pixel-border bg-[#232946]/80 p-4 ${task.completed ? 'opacity-60 grayscale' : ''}`}
             >
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">{getTaskIcon(task.type)}</span>
-                  <h3 className={`font-bold text-sm ${task.completed ? 'line-through' : ''}`}>
+                  <h3 className={`font-bold text-sm pixel-font ${task.completed ? 'line-through' : ''}`}>
                     {task.title}
                   </h3>
                 </div>
                 <div className="flex gap-1">
                   <button
                     onClick={() => toggleTaskComplete(task)}
-                    className={`minecraft-btn text-xs ${
-                      task.completed ? 'task-completed' : 'task-habit'
-                    }`}
+                    className={`px-2 py-1 rounded pixel-border pixel-font text-xs bg-gradient-to-r from-green-500 to-emerald-500 hover:from-cyan-400 hover:to-blue-500 transition-all ${task.completed ? 'opacity-60' : ''}`}
                   >
-                    {task.completed ? '✅' :<svg xmlns="http://www.w3.org/2000/svg" className='h-5 w-5' viewBox="0 0 640 640"><path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM404.4 276.7L324.4 404.7C320.2 411.4 313 415.6 305.1 416C297.2 416.4 289.6 412.8 284.9 406.4L236.9 342.4C228.9 331.8 231.1 316.8 241.7 308.8C252.3 300.8 267.3 303 275.3 313.6L302.3 349.6L363.7 251.3C370.7 240.1 385.5 236.6 396.8 243.7C408.1 250.8 411.5 265.5 404.4 276.8z"/></svg>}
+                    {task.completed ? 'Done' : <svg xmlns="http://www.w3.org/2000/svg" className='h-5 w-5' viewBox="0 0 640 640"><path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM404.4 276.7L324.4 404.7C320.2 411.4 313 415.6 305.1 416C297.2 416.4 289.6 412.8 284.9 406.4L236.9 342.4C228.9 331.8 231.1 316.8 241.7 308.8C252.3 300.8 267.3 303 275.3 313.6L302.3 349.6L363.7 251.3C370.7 240.1 385.5 236.6 396.8 243.7C408.1 250.8 411.5 265.5 404.4 276.8z"/></svg>}
                   </button>
                   <button
                     onClick={() => deleteTask(task.id)}
-                    className="minecraft-btn text-xs"
-                    style={{ background: 'var(--minecraft-red)' }}
+                    className="px-2 py-1 rounded pixel-border pixel-font text-xs bg-gradient-to-r from-pink-500 to-red-500 hover:from-cyan-400 hover:to-blue-500 transition-all"
                     title='Delete'
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className='w-5 h-5' viewBox="0 0 640 640"><path d="M232.7 69.9L224 96L128 96C110.3 96 96 110.3 96 128C96 145.7 110.3 160 128 160L512 160C529.7 160 544 145.7 544 128C544 110.3 529.7 96 512 96L416 96L407.3 69.9C402.9 56.8 390.7 48 376.9 48L263.1 48C249.3 48 237.1 56.8 232.7 69.9zM512 208L128 208L149.1 531.1C150.7 556.4 171.7 576 197 576L443 576C468.3 576 489.3 556.4 490.9 531.1L512 208z"/></svg>
-                    
                   </button>
                 </div>
               </div>
@@ -208,11 +186,7 @@ export default function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
                   {task.tags.map((tag, index) => (
                     <span
                       key={index}
-                      className="inline-block bg-yellow-500 text-black text-xs px-2 py-1 mr-1 mb-1"
-                      style={{
-                        border: '1px solid var(--minecraft-black)',
-                        boxShadow: '1px 1px 0px var(--minecraft-black)'
-                      }}
+                      className="inline-block bg-yellow-500 text-black text-xs px-2 py-1 mr-1 mb-1 pixel-border pixel-font"
                     >
                        {tag}
                     </span>
@@ -224,35 +198,30 @@ export default function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
               <div className="text-xs space-y-1">
                 {task.due_date && (
                   <div className="flex items-center gap-1">
-                    {/* <span>📅</span> */}
                     <span>Due: {formatDate(task.due_date)}</span>
                   </div>
                 )}
                 
                 {task.repeat_interval && (
                   <div className="flex items-center gap-1">
-                    {/* <span>🔄</span> */}
                     <span>Every {task.repeat_interval} mins</span>
                   </div>
                 )}
 
                 {task.reminder_before && (
                   <div className="flex items-center gap-1">
-                    {/* <span>⏰</span> */}
                     <span>Remind {task.reminder_before} mins before</span>
                   </div>
                 )}
 
                 {task.reminder_every && (
                   <div className="flex items-center gap-1">
-                    {/* <span>🔔</span> */}
                     <span>Remind every {task.reminder_every} mins</span>
                   </div>
                 )}
 
                 {task.channel.length > 0 && (
                   <div className="flex items-center gap-1">
-                    {/* <span>📢</span> */}
                     <span>Notify: {task.channel.join(', ')}</span>
                   </div>
                 )}

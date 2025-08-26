@@ -24,55 +24,55 @@ export default function TaskStats({ tasks }: TaskStatsProps) {
   const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   return (
-    <div className="minecraft-card mb-6">
-      <h3 className="text-sm mb-4 text-center"> QUEST STATISTICS</h3>
+    <div className="pixel-border bg-[#181825]/80 p-6 mb-10 mt-6">
+      <h3 className="text-sm mb-4 text-center gaming-accent pixel-font uppercase tracking-wider">QUEST STATISTICS</h3>
       
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
         {/* Total Progress */}
-        <div className="minecraft-container p-3 text-center task-normal">
-          <div className="font-bold text-white">{completionRate}%</div>
-          <div className="text-white">COMPLETE</div>
+        <div className="pixel-border p-3 text-center bg-gradient-to-r from-blue-600 to-purple-600">
+          <div className="font-bold text-white pixel-font text-lg">{completionRate}%</div>
+          <div className="text-white pixel-font">COMPLETE</div>
         </div>
 
         {/* Completed */}
-        <div className="minecraft-container p-3 text-center task-habit">
-          <div className="font-bold text-white">{completedTasks}</div>
-          <div className="text-white">DONE </div>
+        <div className="pixel-border p-3 text-center bg-gradient-to-r from-green-500 to-emerald-500">
+          <div className="font-bold text-white pixel-font text-lg">{completedTasks}</div>
+          <div className="text-white pixel-font">DONE</div>
         </div>
 
         {/* Pending */}
-        <div className="minecraft-container p-3 text-center" style={{ background: 'var(--minecraft-orange)' }}>
-          <div className="font-bold text-white">{pendingTasks}</div>
-          <div className="text-white">PENDING </div>
+        <div className="pixel-border p-3 text-center bg-gradient-to-r from-yellow-500 to-orange-500">
+          <div className="font-bold text-white pixel-font text-lg">{pendingTasks}</div>
+          <div className="text-white pixel-font">PENDING</div>
         </div>
 
         {/* Total */}
-        <div className="minecraft-container p-3 text-center" style={{ background: 'var(--minecraft-gray)' }}>
-          <div className="font-bold text-white">{totalTasks}</div>
-          <div className="text-white">TOTAL </div>
+        <div className="pixel-border p-3 text-center bg-gradient-to-r from-gray-600 to-gray-700">
+          <div className="font-bold text-white pixel-font text-lg">{totalTasks}</div>
+          <div className="text-white pixel-font">TOTAL</div>
         </div>
       </div>
 
       {/* Quest Type Breakdown */}
       {totalTasks > 0 && (
-        <div className="mt-4 pt-4 border-t-2 border-gray-400">
+        <div className="mt-4 pt-4 border-t-2 border-cyan-400/30">
           <div className="grid grid-cols-3 gap-2 text-xs">
             <div className="text-center">
-              <div className="minecraft-container p-2 task-event">
-                <div className="font-bold text-white">{eventTasks}</div>
-                <div className="text-white">EVENTS</div>
+              <div className="pixel-border p-2 bg-gradient-to-r from-red-500 to-pink-500">
+                <div className="font-bold text-white pixel-font">{eventTasks}</div>
+                <div className="text-white pixel-font">EVENTS</div>
               </div>
             </div>
             <div className="text-center">
-              <div className="minecraft-container p-2 task-habit">
-                <div className="font-bold text-white">{habitTasks}</div>
-                <div className="text-white"> HABITS</div>
+              <div className="pixel-border p-2 bg-gradient-to-r from-green-500 to-emerald-500">
+                <div className="font-bold text-white pixel-font">{habitTasks}</div>
+                <div className="text-white pixel-font">HABITS</div>
               </div>
             </div>
             <div className="text-center">
-              <div className="minecraft-container p-2 task-normal">
-                <div className="font-bold text-white">{normalTasks}</div>
-                <div className="text-white"> NORMAL</div>
+              <div className="pixel-border p-2 bg-gradient-to-r from-blue-600 to-purple-600">
+                <div className="font-bold text-white pixel-font">{normalTasks}</div>
+                <div className="text-white pixel-font">NORMAL</div>
               </div>
             </div>
           </div>
@@ -82,15 +82,22 @@ export default function TaskStats({ tasks }: TaskStatsProps) {
       {/* Progress Bar */}
       {totalTasks > 0 && (
         <div className="mt-4">
-          <div className="minecraft-container p-1" style={{ background: 'var(--minecraft-gray)' }}>
+          <div className="pixel-border p-1 bg-[#232946]/50">
             <div 
-              className="h-4 transition-all duration-500 minecraft-container"
+              className="h-4 transition-all duration-500 pixel-border bg-gradient-to-r from-cyan-400 to-blue-500"
               style={{ 
                 width: `${completionRate}%`,
-                background: completionRate === 100 ? 'var(--minecraft-green)' : 'var(--minecraft-yellow)',
-                minWidth: completionRate > 0 ? '20px' : '0px'
+                minWidth: completionRate > 0 ? '20px' : '0px',
+                background: completionRate === 100 
+                  ? 'linear-gradient(to right, #10b981, #059669)' 
+                  : 'linear-gradient(to right, #06b6d4, #3b82f6)'
               }}
             />
+          </div>
+          <div className="text-center mt-2">
+            <span className="text-xs pixel-font gaming-accent">
+              {completionRate === 100 ? 'LEGENDARY STATUS!' : 'Keep grinding!'}
+            </span>
           </div>
         </div>
       )}
