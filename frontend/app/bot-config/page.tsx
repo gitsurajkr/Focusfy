@@ -15,7 +15,6 @@ export default function BotConfigPage() {
         gmailTo: ''
     });
     const [loading, setLoading] = useState(false);
-    const [lastUpdate, setLastUpdate] = useState(0); // Force re-render trigger
     const [currentUser, setCurrentUser] = useState(user); // Local user state for immediate updates
     const [showHelp, setShowHelp] = useState(false); // Help section toggle
 
@@ -49,7 +48,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     try {
         // First, update the profile with the form data
-        const updateRes = await api.put('/api/update-profile', formData);
+        await api.put('/api/update-profile', formData);
         
         // Then fetch the latest user data
         const meRes = await api.get('/api/user/me');
@@ -57,8 +56,6 @@ const handleSubmit = async (e: React.FormEvent) => {
         updateUser(meRes.data.user);
         
         setCurrentUser(meRes.data.user);
-        
-        setLastUpdate(Date.now());
         
         showToast.update(loadingToastId, 'Bot configuration updated successfully!', 'success');
     } catch (error) {
@@ -91,7 +88,7 @@ if (!user) {
 
 
 const getServiceStatus = (service: 'telegram' | 'discord' | 'gmail') => {
-    // Using currentUser for immediate updates and lastUpdate to ensure fresh evaluation
+    // Using currentUser for immediate updates
     const userToCheck = currentUser || user;
   
     // console.log(`BotConfig: Checking ${service} status for user:`, userToCheck);
@@ -163,16 +160,16 @@ return (
                                 <li>Open Telegram and search for <code className="bg-[#232946] px-1 rounded">@BotFather</code></li>
                                 <li>Send <code className="bg-[#232946] px-1 rounded">/start</code> to begin</li>
                                 <li>Send <code className="bg-[#232946] px-1 rounded">/newbot</code> to create a new bot</li>
-                                <li>Choose a name for your bot (e.g., "My Focusfy Bot")</li>
-                                <li>Choose a username ending with "bot" (e.g., "focusfy_reminder_bot")</li>
-                                <li>Copy the bot token from BotFather's message</li>
+                                <li>Choose a name for your bot (e.g., &quot;My Focusfy Bot&quot;)</li>
+                                <li>Choose a username ending with &quot;bot&quot; (e.g., &quot;focusfy_reminder_bot&quot;)</li>
+                                <li>Copy the bot token from BotFather&apos;s message</li>
                                 <li>Start a chat with your new bot and send any message</li>
                                 <li className="bg-[#232946]/30 p-2 rounded border-l-2 border-cyan-400">
                                     <strong className="text-cyan-400">Easy way to get Chat ID:</strong>
                                     <br />Search for <code className="bg-[#232946] px-1 rounded">@myidbot</code> and send <code className="bg-[#232946] px-1 rounded">/getid</code>
                                 </li>
                                 <li className="opacity-60">
-                                    <em>Alternative method:</em> Visit <code className="bg-[#232946] px-1 rounded text-xs">https://api.telegram.org/bot&lt;YOUR_BOT_TOKEN&gt;/getUpdates</code> and look for the "id" field in the "chat" object
+                                    <em>Alternative method:</em> Visit <code className="bg-[#232946] px-1 rounded text-xs">https://api.telegram.org/bot&lt;YOUR_BOT_TOKEN&gt;/getUpdates</code> and look for the &quot;id&quot; field in the &quot;chat&quot; object
                                 </li>
                             </ol>
                         </div>
@@ -182,15 +179,15 @@ return (
                             <h3 className="font-bold text-[#5865F2] pixel-font mb-2">DISCORD BOT SETUP</h3>
                             <ol className="list-decimal list-inside space-y-1 text-sm pixel-font opacity-90">
                                 <li>Go to <a href="https://discord.com/developers/applications" target="_blank" className="text-cyan-400 hover:underline">Discord Developer Portal</a></li>
-                                <li>Click "New Application" and give it a name</li>
-                                <li>Go to "Bot" section in the left sidebar</li>
-                                <li>Click "Add Bot" and confirm</li>
-                                <li>Copy the bot token (click "Copy" under Token section)</li>
-                                <li>Go to "OAuth2" → "URL Generator"</li>
-                                <li>Select "bot" scope and "Send Messages" permission</li>
+                                <li>Click &quot;New Application&quot; and give it a name</li>
+                                <li>Go to &quot;Bot&quot; section in the left sidebar</li>
+                                <li>Click &quot;Add Bot&quot; and confirm</li>
+                                <li>Copy the bot token (click &quot;Copy&quot; under Token section)</li>
+                                <li>Go to &quot;OAuth2&quot; → &quot;URL Generator&quot;</li>
+                                <li>Select &quot;bot&quot; scope and &quot;Send Messages&quot; permission</li>
                                 <li>Copy the generated URL and invite the bot to your server</li>
                                 <li>Enable Developer Mode in Discord (Settings → Advanced → Developer Mode)</li>
-                                <li>Right-click your target channel and select "Copy ID"</li>
+                                <li>Right-click your target channel and select &quot;Copy ID&quot;</li>
                             </ol>
                         </div>
 
