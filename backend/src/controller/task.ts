@@ -74,7 +74,7 @@ const addNotes = async (req: Request, res: Response) => {
       data: {
         title,
         content,
-        userId, // Associate note with user
+        userId, 
       },
     });
     res.status(200).json(newNote);
@@ -92,7 +92,7 @@ const getNotes = async (req: Request, res: Response) => {
     }
 
     const notes = await prisma.notes.findMany({
-      where: { userId }, // Only get user's notes
+      where: { userId }, 
     });
     res.status(200).json(notes);
   } catch (error) {   
@@ -126,7 +126,7 @@ const updateTask = async (req: Request, res: Response) => {
     const updatedTask = await prisma.task.update({
       where: { 
         id: id as string,
-        userId // Ensure user can only update their own tasks
+        userId 
       },
       data: {
         title,
@@ -162,7 +162,7 @@ const updateNote = async (req: Request, res: Response) => {
     const updatedNote = await prisma.notes.update({
       where: { 
         id: id as string,
-        userId // Ensure user can only update their own notes
+        userId 
       },
       data: {
         title,
@@ -190,14 +190,14 @@ const deleteTask = async (req: Request, res: Response) => {
     await prisma.task.delete({
       where: { 
         id: id as string,
-        userId // Ensure user can only delete their own tasks
+        userId 
       },
     });
 
     res.status(204).json({
       message: "Task deleted successfully"
     });
-    console.log("Deleted task with id:", id);
+    // console.log("Deleted task with id:", id);
   } catch (error) {
     console.error("Error deleting task:", error);
     res.status(500).json({ error: "Failed to delete task" });
@@ -218,7 +218,7 @@ const deleteNote = async (req: Request, res: Response) => {
     await prisma.notes.delete({
       where: { 
         id: id as string,
-        userId // Ensure user can only delete their own notes
+        userId 
       },
     });
     res.status(204).send();
@@ -235,12 +235,11 @@ const deleteNote = async (req: Request, res: Response) => {
 const updateProfile = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.userId;
-    console.log('updateProfile: userId:', userId);
+    // console.log('updateProfile: userId:', userId);
     if (!userId) {
       return res.status(401).json({ error: "Authentication required" });
     }
 
-    // Only allow updating certain fields
     const {
       name,
       email,
@@ -251,9 +250,8 @@ const updateProfile = async (req: Request, res: Response) => {
       gmailTo
     } = req.body;
 
-    console.log('updateProfile: Request body:', req.body);
+    // console.log('updateProfile: Request body:', req.body);
 
-    // Build update object
     const updateData: any = {};
     if (name !== undefined) updateData.name = name;
     if (email !== undefined) updateData.email = email;
@@ -263,7 +261,7 @@ const updateProfile = async (req: Request, res: Response) => {
     if (discordChannelId !== undefined) updateData.discordChannelId = discordChannelId;
     if (gmailTo !== undefined) updateData.gmailTo = gmailTo;
 
-    console.log('updateProfile: Update data:', updateData);
+    // console.log('updateProfile: Update data:', updateData);
 
     if (Object.keys(updateData).length === 0) {
       return res.status(400).json({ error: "No valid fields to update" });
@@ -273,7 +271,7 @@ const updateProfile = async (req: Request, res: Response) => {
       where: { id: userId },
       data: updateData,
     });
-    console.log('updateProfile: Updated user from DB:', updatedUser);
+    // console.log('updateProfile: Updated user from DB:', updatedUser);
     res.status(200).json({ message: "Profile updated successfully", user: updatedUser });
   } catch (error) {
     console.error("Error updating profile:", error);

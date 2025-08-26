@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { rootRouter } from './routes/rootRouter';
 import { userRouter } from './routes/userRouter';
-import './services/SchedulerService'; // Initialize scheduler
+import './services/SchedulerService'; 
 
 const app = express();
 
@@ -14,8 +14,8 @@ app.use(cors({
 app.use(express.json());
 
 // Routes
-app.use('/api/user', userRouter);  // User authentication routes
-app.use('/api', rootRouter);       // Protected application routes
+app.use('/api/user', userRouter);  
+app.use('/api', rootRouter);       
 
 // Health check
 app.get('/health', (req, res) => {
@@ -31,7 +31,5 @@ const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
     console.log(`Minecraft Productivity Server is running on port ${PORT}`);
-    console.log(`Telegram Bot: ${process.env.TELEGRAM_BOT_TOKEN ? 'Configured' : 'Not configured'}`);
-    console.log(`Discord Bot: ${process.env.DISCORD_BOT_TOKEN ? 'Configured' : 'Not configured'}`);
     console.log(`Gmail Service: ${process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD ? 'Configured' : 'Not configured'}`);
 });

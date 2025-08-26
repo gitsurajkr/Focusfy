@@ -1,7 +1,3 @@
-
-// Register after rootRouter is declared and after auth middleware
-// Get current user profile (for frontend to fetch latest config)
-
 import express, { Router } from 'express';
 import { addTask, getTasks, addNotes, getNotes, updateTask, updateNote, deleteTask, deleteNote, updateProfile } from '../controller/task';
 import SchedulerService from '../services/SchedulerService';
@@ -18,41 +14,7 @@ app.use(express.json());
 const rootRouter: express.Router = express.Router();
 
 
-// Apply authentication middleware to all routes
 rootRouter.use(decodeUser);
-
-// Get current user profile (for frontend to fetch latest config)
-rootRouter.get('/user/me', async (req, res) => {
-  try {
-    const userId = req.user?.userId;
-    console.log('user/me: userId:', userId);
-    if (!userId) {
-      return res.status(401).json({ error: 'Authentication required' });
-    }
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        telegramBotToken: true,
-        telegramChatId: true,
-        discordBotToken: true,
-        discordChannelId: true,
-        gmailTo: true
-      }
-    });
-    console.log('user/me: User found in DB:', user);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    console.log('user/me: Sending response:', { user });
-    res.json({ user });
-  } catch (error) {
-    console.error('user/me: Error:', error);
-    res.status(500).json({ error: 'Failed to fetch user profile' });
-  }
-});
 
 // task routes
 rootRouter.post('/add-task', addTask)
@@ -92,7 +54,6 @@ rootRouter.post('/test-notification/:taskId', async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Get the task to determine which channels to test
     const task = await prisma.task.findFirst({
       where: { id: taskId, userId: userId }
     });
@@ -101,7 +62,6 @@ rootRouter.post('/test-notification/:taskId', async (req, res) => {
       return res.status(404).json({ error: "Task not found" });
     }
 
-    // Check which notification channels are configured
     const configuredChannels = [];
     const missingConfigs = [];
 

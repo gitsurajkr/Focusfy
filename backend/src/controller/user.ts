@@ -145,7 +145,6 @@ const GetUser = async (req: Request, res: Response) => {
     }
 }
 
-// PATCH /api/user/notification-settings
 const UpdateNotificationSettings = async (req: Request, res: Response) => {
     const userId = req.user?.userId;
 
@@ -153,7 +152,6 @@ const UpdateNotificationSettings = async (req: Request, res: Response) => {
         return res.status(400).json({ error: "User ID is required" });
     }
 
-    // Only allow updating these fields
     const {
         telegramBotToken,
         telegramChatId,

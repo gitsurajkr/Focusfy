@@ -9,7 +9,7 @@ interface NotificationPayload {
   taskTitle: string;
   taskType: 'EVENT' | 'HABIT' | 'NORMAL';
   channels: string[];
-  userId?: string; // For future user-specific notifications
+  userId?: string; 
 }
 
 interface UserNotificationPayload {
@@ -249,7 +249,7 @@ class NotificationService {
   // Temporary fallback for old sendNotification method (scheduled notifications)
   // TODO: Implement user-specific scheduled notifications
   async sendNotification(payload: NotificationPayload): Promise<void> {
-    console.log('📅 Scheduled notification system temporarily disabled - user-specific notifications only');
+    console.log('Scheduled notification system temporarily disabled - user-specific notifications only');
     console.log('Task:', payload.taskTitle, 'Channels:', payload.channels);
     // For now, just log the notification instead of sending it
     // In the future, this should get user settings and call sendUserNotification
