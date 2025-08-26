@@ -253,7 +253,7 @@ class NotificationService {
         throw new Error('Gmail transporter not initialized');
       }
 
-      const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+      const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
       
       const subject = 'Reset Your Focusfy Password';
       const message = `
