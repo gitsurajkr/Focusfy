@@ -3,9 +3,13 @@ import { Request, Response } from "express";
 
 const prisma = new PrismaClient();
 
-
 const addTask = async (req: Request, res: Response) => {
   try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
     const {
       title,
       type = "NORMAL",
@@ -29,6 +33,7 @@ const addTask = async (req: Request, res: Response) => {
         reminder_every,
         channel,
         completed,
+        userId, // Associate task with user
       },
     });
 
@@ -41,7 +46,14 @@ const addTask = async (req: Request, res: Response) => {
 
 const getTasks = async (req: Request, res: Response) => {
   try {
-    const tasks = await prisma.task.findMany();
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
+    const tasks = await prisma.task.findMany({
+      where: { userId }, // Only get user's tasks
+    });
     res.status(200).json(tasks);
   } catch (error) {
     console.error("Error fetching tasks:", error);
@@ -51,12 +63,18 @@ const getTasks = async (req: Request, res: Response) => {
 
 const addNotes = async (req: Request, res: Response) => {
   try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
     const { title, content } = req.body;
 
     const newNote = await prisma.notes.create({
       data: {
         title,
         content,
+        userId, // Associate note with user
       },
     });
     res.status(200).json(newNote);
@@ -68,7 +86,14 @@ const addNotes = async (req: Request, res: Response) => {
 
 const getNotes = async (req: Request, res: Response) => {
   try {
-    const notes = await prisma.notes.findMany();
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
+    const notes = await prisma.notes.findMany({
+      where: { userId }, // Only get user's notes
+    });
     res.status(200).json(notes);
   } catch (error) {   
     console.error("Error fetching notes:", error);
@@ -78,6 +103,11 @@ const getNotes = async (req: Request, res: Response) => {
 
 const updateTask = async (req: Request, res: Response) => {
   try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
     const { id } = req.params;
     if (!id) {
       return res.status(400).json({ error: "Task id is required" });
@@ -94,7 +124,10 @@ const updateTask = async (req: Request, res: Response) => {
       completed
     } = req.body; 
     const updatedTask = await prisma.task.update({
-      where: { id: id as string },
+      where: { 
+        id: id as string,
+        userId // Ensure user can only update their own tasks
+      },
       data: {
         title,
         type,
@@ -116,13 +149,21 @@ const updateTask = async (req: Request, res: Response) => {
 
 const updateNote = async (req: Request, res: Response) => {
   try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
     const { id } = req.params;
     if (!id) {
       return res.status(400).json({ error: "Note id is required" });  
     }
     const { title, content } = req.body;
     const updatedNote = await prisma.notes.update({
-      where: { id: id as string },
+      where: { 
+        id: id as string,
+        userId // Ensure user can only update their own notes
+      },
       data: {
         title,
         content,
@@ -135,15 +176,22 @@ const updateNote = async (req: Request, res: Response) => {
   }
 };
 
-
 const deleteTask = async (req: Request, res: Response) => {
   try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
     const { id } = req.params;
     if (!id) {
       return res.status(400).json({ error: "Task id is required" });
     }
     await prisma.task.delete({
-      where: { id: id as string },
+      where: { 
+        id: id as string,
+        userId // Ensure user can only delete their own tasks
+      },
     });
 
     res.status(204).json({
@@ -158,12 +206,20 @@ const deleteTask = async (req: Request, res: Response) => {
 
 const deleteNote = async (req: Request, res: Response) => {
   try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
     const { id } = req.params;
     if (!id) {  
       return res.status(400).json({ error: "Note id is required" });
     }
     await prisma.notes.delete({
-      where: { id: id as string },
+      where: { 
+        id: id as string,
+        userId // Ensure user can only delete their own notes
+      },
     });
     res.status(204).send();
   } catch (error) {
@@ -175,4 +231,54 @@ const deleteNote = async (req: Request, res: Response) => {
 
 
 
-export { addTask, getTasks, addNotes, getNotes, updateTask, updateNote, deleteTask, deleteNote };
+// Update user profile
+const updateProfile = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.userId;
+    console.log('updateProfile: userId:', userId);
+    if (!userId) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
+    // Only allow updating certain fields
+    const {
+      name,
+      email,
+      telegramBotToken,
+      telegramChatId,
+      discordBotToken,
+      discordChannelId,
+      gmailTo
+    } = req.body;
+
+    console.log('updateProfile: Request body:', req.body);
+
+    // Build update object
+    const updateData: any = {};
+    if (name !== undefined) updateData.name = name;
+    if (email !== undefined) updateData.email = email;
+    if (telegramBotToken !== undefined) updateData.telegramBotToken = telegramBotToken;
+    if (telegramChatId !== undefined) updateData.telegramChatId = telegramChatId;
+    if (discordBotToken !== undefined) updateData.discordBotToken = discordBotToken;
+    if (discordChannelId !== undefined) updateData.discordChannelId = discordChannelId;
+    if (gmailTo !== undefined) updateData.gmailTo = gmailTo;
+
+    console.log('updateProfile: Update data:', updateData);
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ error: "No valid fields to update" });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+    });
+    console.log('updateProfile: Updated user from DB:', updatedUser);
+    res.status(200).json({ message: "Profile updated successfully", user: updatedUser });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res.status(500).json({ error: "Failed to update profile" });
+  }
+};
+
+export { addTask, getTasks, addNotes, getNotes, updateTask, updateNote, deleteTask, deleteNote, updateProfile };

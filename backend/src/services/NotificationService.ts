@@ -12,70 +12,34 @@ interface NotificationPayload {
   userId?: string; // For future user-specific notifications
 }
 
+interface UserNotificationPayload {
+  message: string;
+  taskTitle: string;
+  taskType: 'EVENT' | 'HABIT' | 'NORMAL';
+  channels: string[];
+  userSettings: {
+    telegramBotToken?: string | null;
+    telegramChatId?: string | null;
+    discordBotToken?: string | null;
+    discordChannelId?: string | null;
+    gmailTo?: string | null;
+  };
+}
+
 class NotificationService {
-  private telegramBot: TelegramBot | null = null;
-  private discordClient: Client | null = null;
   private gmailTransporter: Transporter | null = null;
-  private telegramChatId: string = '';
-  private discordChannelId: string = '';
   private gmailUser: string = '';
-  private gmailTo: string = '';
 
   constructor() {
-    this.initializeTelegram();
-    this.initializeDiscord();
+    // Only initialize Gmail with server credentials
+    // Telegram and Discord will use user-specific tokens
     this.initializeGmail();
-  }
-
-  private async initializeTelegram() {
-    const token = process.env.TELEGRAM_BOT_TOKEN;
-    this.telegramChatId = process.env.TELEGRAM_CHAT_ID || '';
-
-    if (!token) {
-      console.warn('Telegram bot token not provided. Telegram notifications disabled.');
-      return;
-    }
-
-    try {
-      this.telegramBot = new TelegramBot(token, { polling: false });
-      console.log('Telegram bot initialized');
-    } catch (error) {
-      console.error('Failed to initialize Telegram bot:', error);
-    }
-  }
-
-  private async initializeDiscord() {
-    const token = process.env.DISCORD_BOT_TOKEN;
-    this.discordChannelId = process.env.DISCORD_CHANNEL_ID || '';
-
-    if (!token) {
-      console.warn('Discord bot token not provided. Discord notifications disabled.');
-      return;
-    }
-
-    try {
-      this.discordClient = new Client({
-        intents: [
-          GatewayIntentBits.Guilds,
-          GatewayIntentBits.GuildMessages
-        ]
-      });
-
-      this.discordClient.once('ready', () => {
-        console.log('Discord bot initialized');
-      });
-
-      await this.discordClient.login(token);
-    } catch (error) {
-      console.error('Failed to initialize Discord bot:', error);
-    }
   }
 
   private async initializeGmail() {
     const user = process.env.GMAIL_USER;
     const appPassword = process.env.GMAIL_APP_PASSWORD;
     this.gmailUser = user || '';
-    this.gmailTo = process.env.GMAIL_TO || user || '';
 
     if (!user || !appPassword) {
       console.warn('Gmail credentials not provided. Email notifications disabled.');
@@ -85,9 +49,7 @@ class NotificationService {
 
     try {
       this.gmailTransporter = nodemailer.createTransport({
-
         service: 'gmail',
-
         auth: {
           user: user,
           pass: appPassword 
@@ -127,172 +89,132 @@ class NotificationService {
       `Keep crafting your productivity!`;
   }
 
-  async sendTelegramNotification(payload: NotificationPayload): Promise<boolean> {
-    if (!this.telegramBot || !this.telegramChatId) {
-      console.log('Telegram not configured, skipping notification');
-      return false;
-    }
-
-    try {
-      const message = this.formatMessage(payload);
-      await this.telegramBot.sendMessage(this.telegramChatId, message, {
-        parse_mode: 'Markdown'
-      });
-      console.log('Telegram notification sent:', payload.taskTitle);
-      return true;
-    } catch (error) {
-      console.error('Failed to send Telegram notification:', error);
-      return false;
-    }
-  }
-
-  async sendDiscordNotification(payload: NotificationPayload): Promise<boolean> {
-    if (!this.discordClient || !this.discordChannelId) {
-      console.log('🎮 Discord not configured, skipping notification');
-      return false;
-    }
-
-    try {
-      const channel = await this.discordClient.channels.fetch(this.discordChannelId) as TextChannel;
-      if (!channel) {
-        console.error('Discord channel not found');
-        return false;
-      }
-
-      const message = this.formatMessage(payload);
-      await channel.send(message);
-      console.log('Discord notification sent:', payload.taskTitle);
-      return true;
-    } catch (error) {
-      console.error('Failed to send Discord notification:', error);
-      return false;
-    }
-  }
-
-  async sendGmailNotification(payload: NotificationPayload): Promise<boolean> {
-    if (!this.gmailTransporter || !this.gmailTo) {
-      console.log('Gmail not configured, skipping email notification');
-      return false;
-    }
-
-    try {
-      const subject = this.getEmailSubject(payload);
-      const htmlBody = this.getEmailHtmlBody(payload);
-      const textBody = this.getEmailTextBody(payload);
-
-      const mailOptions = {
-        from: `"Focusfy Productivity" <${this.gmailUser}>`,
-        to: this.gmailTo,
-        subject: subject,
-        text: textBody,
-        html: htmlBody
-      };
-
-      await this.gmailTransporter.sendMail(mailOptions);
-      console.log('Gmail notification sent:', payload.taskTitle);
-      return true;
-    } catch (error) {
-      console.error('Failed to send Gmail notification:', error);
-      return false;
-    }
-  }
-
-  private getEmailSubject(payload: NotificationPayload): string {
-    const emoji = this.getMinecraftEmoji(payload.taskType);
-    return `${emoji} Focusfy: ${payload.taskTitle}`;
-  }
-
-  private getEmailTextBody(payload: NotificationPayload): string {
-    return `
-FOCUSFY PRODUCTIVITY REMINDER 
-
-${payload.message}
-
-Task: ${payload.taskTitle}
-Type: ${payload.taskType}
-Time: ${new Date().toLocaleString()}
-
-Keep building your productivity castle! 🏗️
-
----
-Sent by Focusfy Productivity System
-    `.trim();
-  }
-
-  private getEmailHtmlBody(payload: NotificationPayload): string {
-    const emoji = this.getMinecraftEmoji(payload.taskType);
-    const typeColor = payload.taskType === 'EVENT' ? '#ff6b6b' :
-      payload.taskType === 'HABIT' ? '#4ecdc4' : '#45b7d1';
-
-    return `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <style>
-        body { font-family: 'Courier New', monospace; background-color: #2c3e50; color: #ecf0f1; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; background: #34495e; border: 4px solid #95a5a6; padding: 20px; }
-        .header { text-align: center; border-bottom: 2px solid #95a5a6; padding-bottom: 15px; margin-bottom: 20px; }
-        .task-type { display: inline-block; padding: 5px 15px; color: white; border: 2px solid; background: ${typeColor}; }
-        .message { font-size: 18px; line-height: 1.5; margin: 20px 0; padding: 15px; background: #2c3e50; border-left: 4px solid ${typeColor}; }
-        .footer { text-align: center; margin-top: 20px; padding-top: 15px; border-top: 2px solid #95a5a6; font-size: 12px; opacity: 0.8; }
-        .pixel-art { font-family: monospace; font-size: 24px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="pixel-art">🏰 FOCUSFY PRODUCTIVITY 🏰</div>
-        </div>
-        
-        <div class="task-type">${emoji} ${payload.taskType} TASK</div>
-        
-        <div class="message">
-            ${payload.message.replace(/\n/g, '<br>')}
-        </div>
-        
-        <div style="margin: 15px 0;">
-            <strong>📝 Task:</strong> ${payload.taskTitle}<br>
-            <strong>⏰ Time:</strong> ${new Date().toLocaleString()}<br>
-            <strong>🎯 Type:</strong> ${payload.taskType}
-        </div>
-        
-        <div class="footer">
-            <div class="pixel-art">Keep building your productivity castle! 🏗️</div>
-            <div style="margin-top: 10px;">Sent by Focusfy Productivity System</div>
-        </div>
-    </div>
-</body>
-</html>
-    `.trim();
-  }
-
-  async sendNotification(payload: NotificationPayload): Promise<void> {
+  // Send notification using user-specific tokens (for testing and actual notifications)
+  async sendUserNotification(payload: UserNotificationPayload) {
     const promises: Promise<boolean>[] = [];
 
-    if (payload.channels.includes('telegram')) {
-      promises.push(this.sendTelegramNotification(payload));
+    if (payload.channels.includes('telegram') && payload.userSettings.telegramBotToken && payload.userSettings.telegramChatId) {
+      promises.push(this.sendUserTelegramNotification(payload));
     }
 
-    if (payload.channels.includes('discord')) {
-      promises.push(this.sendDiscordNotification(payload));
+    if (payload.channels.includes('discord') && payload.userSettings.discordBotToken && payload.userSettings.discordChannelId) {
+      promises.push(this.sendUserDiscordNotification(payload));
     }
 
-    if (payload.channels.includes('gmail') || payload.channels.includes('email')) {
-      promises.push(this.sendGmailNotification(payload));
+    if (payload.channels.includes('gmail') && payload.userSettings.gmailTo) {
+      promises.push(this.sendUserGmailNotification(payload));
     }
 
     if (promises.length === 0) {
-      console.log('📭 No notification channels configured for task:', payload.taskTitle);
+      console.log('📭 No user notification channels configured for task:', payload.taskTitle);
       return;
     }
 
     try {
       const results = await Promise.allSettled(promises);
       const successCount = results.filter(r => r.status === 'fulfilled' && r.value).length;
-      console.log(`Notifications sent: ${successCount}/${promises.length} for task: ${payload.taskTitle}`);
+      console.log(`User notifications sent: ${successCount}/${promises.length} for task: ${payload.taskTitle}`);
     } catch (error) {
-      console.error('Error sending notifications:', error);
+      console.error('Error sending user notifications:', error);
+    }
+  }
+
+  // User-specific notification methods
+  private async sendUserTelegramNotification(payload: UserNotificationPayload): Promise<boolean> {
+    if (!payload.userSettings.telegramBotToken || !payload.userSettings.telegramChatId) {
+      console.log('User Telegram not configured, skipping notification');
+      return false;
+    }
+
+    try {
+      // Create a temporary bot instance with user's token
+      const userBot = new TelegramBot(payload.userSettings.telegramBotToken, { polling: false });
+      const message = this.formatMessage({
+        message: payload.message,
+        taskTitle: payload.taskTitle,
+        taskType: payload.taskType,
+        channels: payload.channels
+      });
+      
+      await userBot.sendMessage(payload.userSettings.telegramChatId, message, {
+        parse_mode: 'Markdown'
+      });
+      console.log('User Telegram notification sent:', payload.taskTitle);
+      return true;
+    } catch (error) {
+      console.error('Failed to send user Telegram notification:', error);
+      return false;
+    }
+  }
+
+  private async sendUserDiscordNotification(payload: UserNotificationPayload): Promise<boolean> {
+    if (!payload.userSettings.discordBotToken || !payload.userSettings.discordChannelId) {
+      console.log('User Discord not configured, skipping notification');
+      return false;
+    }
+
+    try {
+      // Create a temporary Discord client with user's token
+      const userDiscordClient = new Client({
+        intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]
+      });
+
+      await userDiscordClient.login(payload.userSettings.discordBotToken);
+      
+      const channel = await userDiscordClient.channels.fetch(payload.userSettings.discordChannelId) as TextChannel;
+      if (!channel) {
+        console.error('User Discord channel not found');
+        await userDiscordClient.destroy();
+        return false;
+      }
+
+      const message = this.formatMessage({
+        message: payload.message,
+        taskTitle: payload.taskTitle,
+        taskType: payload.taskType,
+        channels: payload.channels
+      });
+      
+      await channel.send(message);
+      console.log('User Discord notification sent:', payload.taskTitle);
+      
+      // Clean up the client
+      await userDiscordClient.destroy();
+      return true;
+    } catch (error) {
+      console.error('Failed to send user Discord notification:', error);
+      return false;
+    }
+  }
+
+  private async sendUserGmailNotification(payload: UserNotificationPayload): Promise<boolean> {
+    if (!this.gmailTransporter || !payload.userSettings.gmailTo) {
+      console.log('User Gmail not configured or transporter not available, skipping notification');
+      return false;
+    }
+
+    try {
+      const subject = `🏰 Focusfy Notification: ${payload.taskTitle}`;
+      const message = this.formatMessage({
+        message: payload.message,
+        taskTitle: payload.taskTitle,
+        taskType: payload.taskType,
+        channels: payload.channels
+      });
+
+      await this.gmailTransporter.sendMail({
+        from: `"Focusfy Productivity" <${this.gmailUser}>`,
+        to: payload.userSettings.gmailTo,
+        subject: subject,
+        text: message,
+        html: `<pre style="font-family: 'Courier New', monospace; background: #f0f0f0; padding: 10px; border-radius: 5px;">${message}</pre>`
+      });
+
+      console.log('User Gmail notification sent to:', payload.userSettings.gmailTo);
+      return true;
+    } catch (error) {
+      console.error('Failed to send user Gmail notification:', error);
+      return false;
     }
   }
 
@@ -322,6 +244,15 @@ Sent by Focusfy Productivity System
 
   getNormalTaskReminder(taskTitle: string): string {
     return `⚒️ Task Reminder: Don't forget about "${taskTitle}" - Let's get it done! 🚀`;
+  }
+
+  // Temporary fallback for old sendNotification method (scheduled notifications)
+  // TODO: Implement user-specific scheduled notifications
+  async sendNotification(payload: NotificationPayload): Promise<void> {
+    console.log('📅 Scheduled notification system temporarily disabled - user-specific notifications only');
+    console.log('Task:', payload.taskTitle, 'Channels:', payload.channels);
+    // For now, just log the notification instead of sending it
+    // In the future, this should get user settings and call sendUserNotification
   }
 }
 

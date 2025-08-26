@@ -14,6 +14,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id String @id @default(uuid())
+  email String @unique
+  password String
+  name String?
+
+  telegramBotToken   String?
+  telegramChatId     String?
+  discordBotToken    String?
+  discordChannelId   String?
+  gmailTo            String?
+  tasks     Task[]
+
+  notes     Notes[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+}
+
 model Task {
   id              String    @id @default(uuid())
   title           String
@@ -24,6 +44,9 @@ model Task {
   reminder_before Int?            // minutes before due_date (for EVENT, e.g., 30)
   reminder_every  Int?            // repeat interval before due_date (for EVENT, e.g., 10)
   channel         String[]        // ["telegram", "discord"]
+
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
   completed       Boolean   @default(false)
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
@@ -33,6 +56,9 @@ model Notes {
   id         String   @id @default(uuid())
   title      String?
   content    String
+
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }

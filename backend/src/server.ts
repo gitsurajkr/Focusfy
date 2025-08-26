@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { rootRouter } from './routes/rootRouter';
+import { userRouter } from './routes/userRouter';
 import './services/SchedulerService'; // Initialize scheduler
 
 const app = express();
@@ -13,7 +14,8 @@ app.use(cors({
 app.use(express.json());
 
 // Routes
-app.use('/api', rootRouter);
+app.use('/api/user', userRouter);  // User authentication routes
+app.use('/api', rootRouter);       // Protected application routes
 
 // Health check
 app.get('/health', (req, res) => {

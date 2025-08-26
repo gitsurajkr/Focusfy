@@ -98,12 +98,29 @@ class SchedulerService {
         console.log(`Sending reminder for "${task.title}"`);
         const message = NotificationService.getEventReminder(task.title, minutesUntilDue);
         
-        await NotificationService.sendNotification({
-          message,
-          taskTitle: task.title,
-          taskType: task.type,
-          channels: task.channel
+        // Get user's notification settings
+        const user = await prisma.user.findUnique({
+          where: { id: task.userId },
+          select: {
+            telegramBotToken: true,
+            telegramChatId: true,
+            discordBotToken: true,
+            discordChannelId: true,
+            gmailTo: true
+          }
         });
+
+        if (user) {
+          await NotificationService.sendUserNotification({
+            message,
+            taskTitle: task.title,
+            taskType: task.type,
+            channels: task.channel,
+            userSettings: user
+          });
+        } else {
+          console.error(`User not found for task: ${task.title}`);
+        }
 
         await this.updateLastNotificationTime(task.id, 'reminder_before');
       } else {
@@ -120,12 +137,29 @@ class SchedulerService {
         console.log(`Sending overdue notification for "${task.title}"`);
         const message = `EVENT STARTED: "${task.title}" has begun! Time to take action!`;
         
-        await NotificationService.sendNotification({
-          message,
-          taskTitle: task.title,
-          taskType: task.type,
-          channels: task.channel
+        // Get user's notification settings
+        const user = await prisma.user.findUnique({
+          where: { id: task.userId },
+          select: {
+            telegramBotToken: true,
+            telegramChatId: true,
+            discordBotToken: true,
+            discordChannelId: true,
+            gmailTo: true
+          }
         });
+
+        if (user) {
+          await NotificationService.sendUserNotification({
+            message,
+            taskTitle: task.title,
+            taskType: task.type,
+            channels: task.channel,
+            userSettings: user
+          });
+        } else {
+          console.error(`User not found for task: ${task.title}`);
+        }
 
         await this.updateLastNotificationTime(task.id, 'started');
       } else {
@@ -147,12 +181,29 @@ class SchedulerService {
       console.log(`Sending habit reminder for "${task.title}"`);
       const message = NotificationService.getHabitReminder(task.title);
       
-      await NotificationService.sendNotification({
-        message,
-        taskTitle: task.title,
-        taskType: task.type,
-        channels: task.channel
+      // Get user's notification settings
+      const user = await prisma.user.findUnique({
+        where: { id: task.userId },
+        select: {
+          telegramBotToken: true,
+          telegramChatId: true,
+          discordBotToken: true,
+          discordChannelId: true,
+          gmailTo: true
+        }
       });
+
+      if (user) {
+        await NotificationService.sendUserNotification({
+          message,
+          taskTitle: task.title,
+          taskType: task.type,
+          channels: task.channel,
+          userSettings: user
+        });
+      } else {
+        console.error(`User not found for task: ${task.title}`);
+      }
 
       await this.updateLastNotificationTime(task.id, 'habit_reminder');
     } else {
@@ -174,12 +225,29 @@ class SchedulerService {
       console.log(`Sending normal task reminder for "${task.title}"`);
       const message = NotificationService.getNormalTaskReminder(task.title);
       
-      await NotificationService.sendNotification({
-        message,
-        taskTitle: task.title,
-        taskType: task.type,
-        channels: task.channel
+      // Get user's notification settings
+      const user = await prisma.user.findUnique({
+        where: { id: task.userId },
+        select: {
+          telegramBotToken: true,
+          telegramChatId: true,
+          discordBotToken: true,
+          discordChannelId: true,
+          gmailTo: true
+        }
       });
+
+      if (user) {
+        await NotificationService.sendUserNotification({
+          message,
+          taskTitle: task.title,
+          taskType: task.type,
+          channels: task.channel,
+          userSettings: user
+        });
+      } else {
+        console.error(`User not found for task: ${task.title}`);
+      }
 
       await this.updateLastNotificationTime(task.id, 'normal_reminder');
     } else {
@@ -246,6 +314,83 @@ class SchedulerService {
       return { success: true, message: 'Gmail test notification sent' };
     } catch (error: any) {
       console.error('Error sending Gmail test notification:', error);
+      return { success: false, error: error?.message || 'Unknown error' };
+    }
+  }
+
+  // Test notification for specific user with their configured channels
+  async testNotificationForUser(taskId: string, userId: string, configuredChannels: string[]) {
+    try {
+      const task = await prisma.task.findFirst({
+        where: { id: taskId, userId: userId }
+      });
+
+      if (!task) {
+        return { success: false, error: 'Task not found' };
+      }
+
+      const message = `TEST: Your notification system is working! Task: ${task.title} - Sent at ${new Date().toLocaleString()}`;
+
+      // Get user's notification settings
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          telegramBotToken: true,
+          telegramChatId: true,
+          discordBotToken: true,
+          discordChannelId: true,
+          gmailTo: true
+        }
+      });
+
+      if (!user) {
+        return { success: false, error: 'User not found' };
+      }
+
+      // Create a user-specific notification service instance
+      await NotificationService.sendUserNotification({
+        message,
+        taskTitle: task.title,
+        taskType: task.type as any,
+        channels: configuredChannels,
+        userSettings: user
+      });
+
+      return { success: true, message: `Test notification sent to configured channels: ${configuredChannels.join(', ')}` };
+    } catch (error: any) {
+      console.error('Error sending user-specific test notification:', error);
+      return { success: false, error: error?.message || 'Unknown error' };
+    }
+  }
+
+  // Test Gmail notification for specific user
+  async testGmailNotificationForUser(userId: string, gmailTo: string) {
+    try {
+      const message = `TEST: Gmail notification service is working! Sent at ${new Date().toLocaleString()}`;
+      
+      // Get user settings
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          gmailTo: true
+        }
+      });
+
+      if (!user || !user.gmailTo) {
+        return { success: false, error: 'Gmail recipient not configured' };
+      }
+
+      await NotificationService.sendUserNotification({
+        message,
+        taskTitle: "Gmail Test",
+        taskType: 'NORMAL',
+        channels: ['gmail'],
+        userSettings: { gmailTo: user.gmailTo }
+      });
+
+      return { success: true, message: `Gmail test notification sent to ${user.gmailTo}` };
+    } catch (error: any) {
+      console.error('Error sending user-specific Gmail test notification:', error);
       return { success: false, error: error?.message || 'Unknown error' };
     }
   }
