@@ -345,8 +345,8 @@ export default function NotificationTest({ tasks }: NotificationTestProps) {
                 <div className="mb-4">
                     <h4 className="text-sm font-bold pixel-font mb-2 text-white/90">Result:</h4>
                     <div className={`pixel-border p-3 text-xs ${
-                        result.includes('✅') ? 'bg-green-900/20 border-green-600' : 
-                        result.includes('❌') ? 'bg-red-900/20 border-red-600' : 'bg-blue-900/20 border-blue-600'
+                        result.includes('') ? 'bg-green-900/20 border-green-600' : 
+                        result.includes('') ? 'bg-red-900/20 border-red-600' : 'bg-blue-900/20 border-blue-600'
                     }`}>{result}</div>
                 </div>
             )}

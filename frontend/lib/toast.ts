@@ -36,7 +36,7 @@ export const showToast = {
   
   update: (toastId: string | number, message: string, type: 'success' | 'error' | 'info', options?: ToastOptions) => {
     toast.update(toastId, {
-      render: `${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'} ${message}`,
+      render: `${type === 'success' ? '' : type === 'error' ? '' : ''} ${message}`,
       type: type,
       isLoading: false,
       ...defaultOptions,
