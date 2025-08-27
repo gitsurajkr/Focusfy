@@ -11,8 +11,9 @@ import { showToast } from '../lib/toast';
 import { Task, Note, ApiError } from '../types';
 
 export default function Home() {
-  const {  token, logout } = useAuth();
+  const { token, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<'tasks' | 'notes'>('tasks');
+  const [taskSubTab, setTaskSubTab] = useState<'create' | 'view'>('view');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
 
@@ -104,86 +105,125 @@ export default function Home() {
           </button>
         </div>
       </header>
-      {/* Main Content */}
-      <main className="flex-1 w-full max-w-6xl mx-auto pb-24 sm:pb-0">
-        {/* Mobile: Only show the selected section/form */}
-        <div className="sm:hidden">
-          {activeTab === 'tasks' ? (
-            <>
-              <section className="pixel-border bg-[#181825]/80 p-4 mt-2 mb-4 shadow-lg">
-                <h2 className="text-lg font-bold text-center mb-4 gaming-accent pixel-font uppercase tracking-wide">
-                  CREATE MISSION
-                </h2>
-                <TaskForm onTaskCreated={handleTaskUpdate} />
-              </section>
-              <section className="pixel-border bg-[#181825]/80 p-4 mb-4 shadow-lg">
-                <h2 className="text-lg font-bold text-center mb-4 gaming-accent pixel-font uppercase tracking-wide">
-                  ACTIVE MISSIONS
-                </h2>
-                <TaskList tasks={tasks} onTaskUpdate={handleTaskUpdate} />
-              </section>
-            </>
-          ) : (
-            <section className="pixel-border bg-[#181825]/80 p-4 mt-2 mb-4 shadow-lg">
-              <h2 className="text-lg font-bold text-center mb-4 gaming-accent pixel-font uppercase tracking-wide">
-                MISSION LOGS
-              </h2>
-              <NotesSection notes={notes} onNotesUpdate={handleNotesUpdate} />
-            </section>
-          )}
+
+      {/* Sub-navigation for Tasks */}
+      {activeTab === 'tasks' && (
+        <div className="w-full max-w-6xl mx-auto px-4 mt-4">
+          <div className="flex gap-2 sm:gap-4 justify-center">
+            <button
+              onClick={() => setTaskSubTab('create')}
+              className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg pixel-border pixel-font text-xs sm:text-sm font-semibold uppercase tracking-wide transition-all duration-300 border-2 shadow-md text-white ${taskSubTab === 'create' ? 'bg-gradient-to-r from-purple-500 to-pink-500 border-purple-400 shadow-purple-500/25' : 'bg-gradient-to-r from-gray-600 to-gray-700 border-gray-500 hover:border-purple-400 hover:shadow-purple-400/25 hover:shadow-lg'}`}
+            >
+              Create Task
+            </button>
+
+            <button
+              onClick={() => setTaskSubTab('view')}
+              className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg pixel-border pixel-font text-xs sm:text-sm font-semibold uppercase tracking-wide transition-all duration-300 border-2 shadow-md text-white ${taskSubTab === 'view' ? 'bg-gradient-to-r from-cyan-500 to-blue-500 border-cyan-400 shadow-cyan-500/25' : 'bg-gradient-to-r from-gray-600 to-gray-700 border-gray-500 hover:border-cyan-400 hover:shadow-cyan-400/25 hover:shadow-lg'}`}
+            >
+              View Tasks
+            </button>
+
+          </div>
         </div>
-        {/* Desktop: Original layout restored */}
-        <div className="hidden sm:block">
-          {activeTab === 'tasks' ? (
+      )}
+
+      {/* Main Content */}
+      <main className="flex-1 w-full max-w-6xl mx-auto pb-24 sm:pb-0 px-4 mt-6">{/* Main Content */}
+        {activeTab === 'tasks' ? (
+          taskSubTab === 'create' ? (
+            // Create Task Section
+            <div className="pixel-border bg-[#181825]/80 p-6 shadow-lg">
+              <h2 className="text-xl font-bold text-center mb-6 gaming-accent pixel-font uppercase tracking-wide">
+                CREATE NEW MISSION
+              </h2>
+              <TaskForm onTaskCreated={handleTaskUpdate} />
+            </div>
+          ) : (
+            // View Tasks Section
             <div className="space-y-6">
               <TaskStats tasks={tasks} />
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Task Form */}
-                <div className="lg:col-span-1">
-                  <div className="pixel-border bg-[#181825]/80 p-6 shadow-lg">
-                    <h2 className="text-lg font-bold text-center mb-4 gaming-accent pixel-font uppercase tracking-wide">
-                      CREATE MISSION
-                    </h2>
-                    <TaskForm onTaskCreated={handleTaskUpdate} />
-                  </div>
-                </div>
-                {/* Task List */}
-                <div className="lg:col-span-2">
-                  <div className="pixel-border bg-[#181825]/80 p-6 shadow-lg">
-                    <h2 className="text-lg font-bold text-center mb-4 gaming-accent pixel-font uppercase tracking-wide">
-                      ACTIVE MISSIONS
-                    </h2>
-                    <TaskList tasks={tasks} onTaskUpdate={handleTaskUpdate} />
-                  </div>
-                </div>
+              <div className="pixel-border bg-[#181825]/80 p-6 shadow-lg">
+                <h2 className="text-xl font-bold text-center mb-6 gaming-accent pixel-font uppercase tracking-wide">
+                  ACTIVE MISSIONS ({tasks.length})
+                </h2>
+                <TaskList tasks={tasks} onTaskUpdate={handleTaskUpdate} />
               </div>
             </div>
-          ) : (
-            <div className="pixel-border bg-[#181825]/80 p-6 shadow-lg">
-              <h2 className="text-lg font-bold text-center mb-4 gaming-accent pixel-font uppercase tracking-wide">
-                MISSION LOGS
-              </h2>
-              <NotesSection notes={notes} onNotesUpdate={handleNotesUpdate} />
-            </div>
-          )}
-        </div>
+          )
+        ) : (
+          // Notes Section
+          <div className="pixel-border bg-[#181825]/80 p-6 shadow-lg">
+            <h2 className="text-xl font-bold text-center mb-6 gaming-accent pixel-font uppercase tracking-wide">
+              MISSION LOGS
+            </h2>
+            <NotesSection notes={notes} onNotesUpdate={handleNotesUpdate} />
+          </div>
+        )}
       </main>
-      {/* WhatsApp-style Mobile Footer Nav */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-[#232946] border-t border-cyan-400 flex justify-around items-center h-16 px-2">
-        <button
-          onClick={() => setActiveTab('tasks')}
-          className={`flex flex-col items-center flex-1 h-full justify-center ${activeTab === 'tasks' ? 'text-cyan-400 font-bold' : 'text-white/70'}`}
-        >
-          
-          <span className="text-xs mt-1">Tasks</span>
-        </button>
-        <button
-          onClick={() => setActiveTab('notes')}
-          className={`flex flex-col items-center flex-1 h-full justify-center ${activeTab === 'notes' ? 'text-green-400 font-bold' : 'text-white/70'}`}
-        >
-      
-          <span className="text-xs mt-1">Notes</span>
-        </button>
+      {/* Mobile Footer Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-[#232946] border-t border-cyan-400">
+        {activeTab === 'tasks' ? (
+          // Task Sub-Navigation (Mobile)
+          <div className="flex justify-around items-center h-16 px-2">
+
+            <button
+              onClick={() => setTaskSubTab('create')}
+              className={`flex flex-col items-center flex-1 h-full justify-center ${taskSubTab === 'create' ? 'text-purple-400 font-bold' : 'text-white/70'}`}
+            >
+              <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+              </svg>
+              <span className="text-xs">Create</span>
+            </button>
+            <button
+              onClick={() => setTaskSubTab('view')}
+              className={`flex flex-col items-center flex-1 h-full justify-center ${taskSubTab === 'view' ? 'text-cyan-400 font-bold' : 'text-white/70'}`}
+            >
+              <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                <path fillRule="evenodd" d="M4 5a2 2 0 012-2v1a2 2 0 00-2 2v6a2 2 0 002 2h8a2 2 0 002-2V6a2 2 0 00-2-2V3a2 2 0 012-2v1a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5z" clipRule="evenodd" />
+              </svg>
+              <span className="text-xs">View</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('notes')}
+              className="flex flex-col items-center flex-1 h-full justify-center text-white/70"
+            >
+              <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z" />
+              </svg>
+              <span className="text-xs">Notes</span>
+            </button>
+
+          </div>
+        ) : (
+          // Main Navigation (Mobile - Notes active)
+          <div className="flex justify-around items-center h-16 px-2">
+            <button
+              onClick={() => {
+                setActiveTab('tasks');
+                setTaskSubTab('view');
+              }}
+              className="flex flex-col items-center flex-1 h-full justify-center text-white/70"
+            >
+              <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                <path fillRule="evenodd" d="M4 5a2 2 0 012-2v1a2 2 0 00-2 2v6a2 2 0 002 2h8a2 2 0 002-2V6a2 2 0 00-2-2V3a2 2 0 012-2v1a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5z" clipRule="evenodd" />
+              </svg>
+              <span className="text-xs">Tasks</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('notes')}
+              className="flex flex-col items-center flex-1 h-full justify-center text-green-400 font-bold"
+            >
+              <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z" />
+              </svg>
+              <span className="text-xs">Notes</span>
+            </button>
+          </div>
+        )}
       </nav>
       {/* Footer (visible on all devices) */}
       <footer className="mt-8 mb-20 sm:mb-8 text-center pixel-border bg-[#232946]/80 p-4">
