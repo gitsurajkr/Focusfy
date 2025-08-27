@@ -11,7 +11,7 @@ import { showToast } from '../lib/toast';
 import { Task, Note, ApiError } from '../types';
 
 export default function Home() {
-  const { user, token, logout } = useAuth();
+  const {  token, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<'tasks' | 'notes'>('tasks');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);

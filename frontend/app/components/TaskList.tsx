@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import api from '../../lib/api';
 import { showToast } from '../../lib/toast';
 import { Task, ApiError } from '../../types';
@@ -12,7 +11,6 @@ interface TaskListProps {
 }
 
 export default function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
-  const { token } = useAuth();
   const [filter, setFilter] = useState<'ALL' | 'EVENT' | 'HABIT' | 'NORMAL' | 'COMPLETED'>('ALL');
   const getTaskIcon = (type: string) => {
     switch (type) {
