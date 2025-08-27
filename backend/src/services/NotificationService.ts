@@ -9,7 +9,7 @@ interface NotificationPayload {
   taskTitle: string;
   taskType: 'EVENT' | 'HABIT' | 'NORMAL';
   channels: string[];
-  userId?: string; 
+  userId?: string; // For future user-specific notifications
 }
 
 interface UserNotificationPayload {
@@ -246,83 +246,179 @@ class NotificationService {
     return `⚒️ Task Reminder: Don't forget about "${taskTitle}" - Let's get it done! 🚀`;
   }
 
-  // Send password reset email
+  // Password Reset Email Method
   async sendPasswordResetEmail(email: string, resetToken: string): Promise<boolean> {
+    if (!this.gmailTransporter) {
+      console.error('Gmail transporter not available for password reset email');
+      return false;
+    }
+
     try {
-      if (!this.gmailTransporter) {
-        throw new Error('Gmail transporter not initialized');
-      }
-
-      const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+      const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
       
-      const subject = 'Reset Your Focusfy Password';
-      const message = `
-Hi there,
-
-You requested to reset your password for your Focusfy account. Click the link below to reset your password:
-
-${resetLink}
-
-This link will expire in 1 hour for security reasons.
-
-If you didn't request this password reset, please ignore this email. Your password will remain unchanged.
-
-Best regards,
-Focusfy Team
-      `.trim();
-
-      const htmlMessage = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #ffffff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-          <h2 style="color: #333; text-align: center; margin-bottom: 30px;">Reset Your Focusfy Password</h2>
-          
-          <p style="color: #555; font-size: 16px; line-height: 1.5; margin-bottom: 20px;">
-            Hi there,
-          </p>
-          
-          <p style="color: #555; font-size: 16px; line-height: 1.5; margin-bottom: 30px;">
-            You requested to reset your password for your Focusfy account. Click the button below to reset your password:
-          </p>
-          
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${resetLink}" style="background: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-size: 16px; font-weight: bold; display: inline-block;">
-              Reset Password
-            </a>
+      const subject = '🔐 Focusfy - Password Reset Request';
+      
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Password Reset - Focusfy</title>
+          <style>
+            body { 
+              font-family: 'Courier New', monospace; 
+              background: linear-gradient(135deg, #181825, #232946);
+              margin: 0; 
+              padding: 20px;
+              color: #ffffff;
+            }
+            .container { 
+              max-width: 600px; 
+              margin: 0 auto; 
+              background: #181825; 
+              border: 3px solid #00ffff; 
+              border-radius: 8px;
+              padding: 30px;
+              box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+            }
+            .header { 
+              text-align: center; 
+              margin-bottom: 30px; 
+              color: #00ffff;
+              text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            }
+            .logo { 
+              font-size: 24px; 
+              font-weight: bold; 
+              margin-bottom: 10px; 
+            }
+            .content { 
+              line-height: 1.6; 
+              margin-bottom: 30px; 
+            }
+            .reset-button { 
+              display: inline-block; 
+              background: linear-gradient(45deg, #00ffff, #0080ff); 
+              color: #000000; 
+              padding: 15px 30px; 
+              text-decoration: none; 
+              border-radius: 4px; 
+              font-weight: bold; 
+              font-family: 'Courier New', monospace;
+              border: 2px solid #00ffff;
+              box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+            }
+            .reset-button:hover { 
+              background: linear-gradient(45deg, #0080ff, #00ffff); 
+            }
+            .warning { 
+              background: #4a1a1a; 
+              border: 1px solid #ff6b6b; 
+              padding: 15px; 
+              border-radius: 4px; 
+              margin: 20px 0; 
+              color: #ff9999;
+            }
+            .footer { 
+              text-align: center; 
+              font-size: 12px; 
+              color: #888; 
+              margin-top: 30px; 
+            }
+            .pixel-art { 
+              font-family: monospace; 
+              font-size: 14px; 
+              color: #00ffff; 
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <div class="logo">🎮 FOCUSFY</div>
+              <div class="pixel-art">Productivity • Gamified</div>
+            </div>
+            
+            <div class="content">
+              <h2 style="color: #00ffff;">Password Reset Request</h2>
+              
+              <p>Hello,</p>
+              
+              <p>We received a request to reset the password for your Focusfy account associated with <strong style="color: #00ffff;">${email}</strong>.</p>
+              
+              <p>Click the button below to reset your password:</p>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${resetUrl}" class="reset-button">🔐 RESET PASSWORD</a>
+              </div>
+              
+              <div class="warning">
+                <strong>⚠️ Important Security Information:</strong>
+                <ul>
+                  <li>This link will expire in <strong>1 hour</strong> for security</li>
+                  <li>If you didn't request this reset, you can safely ignore this email</li>
+                  <li>Your password will remain unchanged until you create a new one</li>
+                </ul>
+              </div>
+              
+              <p>If the button doesn't work, copy and paste this link into your browser:</p>
+              <p style="word-break: break-all; color: #00ffff; background: #232946; padding: 10px; border-radius: 4px;">
+                ${resetUrl}
+              </p>
+              
+              <p style="margin-top: 30px;">
+                Keep crafting your productivity!<br>
+                <strong style="color: #00ffff;">The Focusfy Team</strong> 🏰
+              </p>
+            </div>
+            
+            <div class="footer">
+              <p>This email was sent because a password reset was requested for your Focusfy account.</p>
+              <p>If you have any questions, please contact our support team.</p>
+              <div class="pixel-art" style="margin-top: 15px;">
+                ░░░░░░░░░░░░░░░░░░░░░░░░░<br>
+                ░ CRAFT YOUR PRODUCTIVITY ░<br>
+                ░    BLOCK BY BLOCK      ░<br>
+                ░░░░░░░░░░░░░░░░░░░░░░░░░
+              </div>
+            </div>
           </div>
-          
-          <p style="color: #888; font-size: 14px; line-height: 1.5; margin-bottom: 10px;">
-            Or copy and paste this link in your browser:
-          </p>
-          <p style="color: #007bff; font-size: 14px; word-break: break-all; margin-bottom: 30px;">
-            ${resetLink}
-          </p>
-          
-          <div style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 30px;">
-            <p style="color: #888; font-size: 14px; line-height: 1.5; margin-bottom: 10px;">
-              ⚠️ This link will expire in 1 hour for security reasons.
-            </p>
-            <p style="color: #888; font-size: 14px; line-height: 1.5; margin-bottom: 20px;">
-              If you didn't request this password reset, please ignore this email. Your password will remain unchanged.
-            </p>
-          </div>
-          
-          <div style="text-align: center; margin-top: 20px;">
-            <p style="color: #999; font-size: 12px;">
-              Best regards,<br>
-              <strong>Focusfy Team</strong>
-            </p>
-          </div>
-        </div>
+        </body>
+        </html>
+      `;
+
+      const textContent = `
+ FOCUSFY - Password Reset Request
+
+Hello,
+
+We received a request to reset the password for your Focusfy account associated with ${email}.
+
+Click the link below to reset your password:
+${resetUrl}
+
+⚠️ Important Security Information:
+- This link will expire in 1 hour for security
+- If you didn't request this reset, you can safely ignore this email
+- Your password will remain unchanged until you create a new one
+
+Keep crafting your productivity!
+The Focusfy Team 🏰
+
+---
+This email was sent because a password reset was requested for your Focusfy account.
+If you have any questions, please contact our support team.
       `;
 
       await this.gmailTransporter.sendMail({
         from: `"Focusfy Productivity" <${this.gmailUser}>`,
         to: email,
         subject: subject,
-        text: message,
-        html: htmlMessage
+        text: textContent,
+        html: htmlContent
       });
 
-      console.log('Password reset email sent to:', email);
+      console.log('Password reset email sent successfully to:', email);
       return true;
     } catch (error) {
       console.error('Failed to send password reset email:', error);
@@ -333,7 +429,7 @@ Focusfy Team
   // Temporary fallback for old sendNotification method (scheduled notifications)
   // TODO: Implement user-specific scheduled notifications
   async sendNotification(payload: NotificationPayload): Promise<void> {
-    console.log('Scheduled notification system temporarily disabled - user-specific notifications only');
+    console.log('📅 Scheduled notification system temporarily disabled - user-specific notifications only');
     console.log('Task:', payload.taskTitle, 'Channels:', payload.channels);
     // For now, just log the notification instead of sending it
     // In the future, this should get user settings and call sendUserNotification
