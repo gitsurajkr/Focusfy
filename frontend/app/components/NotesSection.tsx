@@ -137,8 +137,8 @@ export default function NotesSection({ notes, onNotesUpdate }: NotesSectionProps
         <div className="pixel-border bg-yellow-400/10 mb-6 p-4">
           <h3 className="text-sm mb-4 text-center pixel-font">
             {editingNote ? 'EDIT NOTE' : 'CREATE NOTE'}
-          </h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          </h3> 
+          <form onSubmit={handleSubmit} className="space-y-4 ">
             <div>
               <label className="block text-xs mb-2 pixel-font">Title (optional):</label>
               <input
@@ -181,7 +181,7 @@ export default function NotesSection({ notes, onNotesUpdate }: NotesSectionProps
       )}
 
       {/* Notes List */}
-      <div className="space-y-4 max-h-96 overflow-y-auto">
+      <div className="space-y-4 max-h-96 overflow-y-auto ">
         {sortedNotes.length === 0 ? (
           <div className="text-center pixel-border bg-[#181825]/80 p-6">
             <p className="text-sm pixel-font">No adventure logs found!</p>
@@ -191,7 +191,7 @@ export default function NotesSection({ notes, onNotesUpdate }: NotesSectionProps
           sortedNotes.map((note) => (
             <div
               key={note.id}
-              className="pixel-border bg-[#f5f5dc] p-4"
+              className="pixel-border bg-[#181825] p-4"
             >
               <div className="flex justify-between items-start mb-2">
                 <div className="flex-1">

@@ -96,7 +96,7 @@ export default function TaskStats({ tasks }: TaskStatsProps) {
           </div>
           <div className="text-center mt-2">
             <span className="text-xs pixel-font gaming-accent">
-              {completionRate === 100 ? 'LEGENDARY STATUS!' : 'Keep grinding!'}
+              {completionRate === 100 ? 'LEGENDARY STATUS!' : 'Keep grinding, gamer!'}
             </span>
           </div>
         </div>

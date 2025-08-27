@@ -12,7 +12,7 @@ interface TaskListProps {
 }
 
 export default function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
-  // const { token } = useAuth();
+  const { token } = useAuth();
   const [filter, setFilter] = useState<'ALL' | 'EVENT' | 'HABIT' | 'NORMAL' | 'COMPLETED'>('ALL');
   const getTaskIcon = (type: string) => {
     switch (type) {
@@ -79,7 +79,7 @@ export default function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
       const loadingToastId = showToast.loading('Deleting quest...');
       try {
         await api.delete(`/api/delete-task/${taskId}`);
-        showToast.update(loadingToastId, 'Quest deleted successfully!', 'success');
+        showToast.update(loadingToastId, 'Quest deleted successfully! 🗑️', 'success');
         onTaskUpdate();
       } catch (error) {
         const apiError = error as ApiError;

@@ -11,7 +11,7 @@ import { showToast } from '../lib/toast';
 import { Task, Note, ApiError } from '../types';
 
 export default function Home() {
-  const { token, logout } = useAuth();
+  const { user, token, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<'tasks' | 'notes'>('tasks');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
@@ -174,30 +174,30 @@ export default function Home() {
           onClick={() => setActiveTab('tasks')}
           className={`flex flex-col items-center flex-1 h-full justify-center ${activeTab === 'tasks' ? 'text-cyan-400 font-bold' : 'text-white/70'}`}
         >
-          <span className="text-xl">Target</span>
+          
           <span className="text-xs mt-1">Tasks</span>
         </button>
         <button
           onClick={() => setActiveTab('notes')}
           className={`flex flex-col items-center flex-1 h-full justify-center ${activeTab === 'notes' ? 'text-green-400 font-bold' : 'text-white/70'}`}
         >
-          <span className="text-xl">Note</span>
+      
           <span className="text-xs mt-1">Notes</span>
         </button>
       </nav>
-      {/* Footer (desktop only) */}
-      <footer className="hidden sm:block mt-8 text-center pixel-border bg-[#232946]/80 p-4">
+      {/* Footer (visible on all devices) */}
+      <footer className="mt-8 mb-20 sm:mb-8 text-center pixel-border bg-[#232946]/80 p-4">
         <div className="space-y-2">
           <p className="text-xs gaming-accent pixel-font">
             Level up your productivity with a gaming pixel vibe!
           </p>
-          <div className="flex justify-center items-center gap-4 text-xs text-white opacity-80">
+          <div className="flex justify-center items-center gap-2 sm:gap-4 text-xs text-white opacity-80 flex-wrap">
             <span>Crafted by</span>
             <span className="px-2 py-1 pixel-border pixel-font bg-gradient-to-r from-cyan-400 to-blue-500 text-white">Suraj</span>
             <span>•</span>
             <span> {new Date().getFullYear()}</span>
           </div>
-          <div className="flex justify-center items-center gap-3 mt-2">
+          <div className="flex justify-center items-center gap-2 sm:gap-3 mt-2 flex-wrap">
             <a
               href="https://github.com/gitsurajkr"
               className="px-2 py-1 text-xs pixel-border pixel-font bg-gradient-to-r from-blue-600 to-purple-600 hover:from-cyan-400 hover:to-blue-500 transition-all"
@@ -215,7 +215,7 @@ export default function Home() {
               Portfolio
             </a>
           </div>
-          <div className="text-xs text-white opacity-60 mt-2">
+          <div className="text-xs text-white opacity-60 mt-2 px-2">
             <span className="pixel-font">&quot;The way to get started is to quit talking and begin doing.&quot; - Steve</span>
           </div>
         </div>
