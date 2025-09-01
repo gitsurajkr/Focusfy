@@ -44,7 +44,8 @@ model Task {
   title           String
   type            Type      @default(NORMAL)
   tags            String[]
-  due_date        DateTime?       // for EVENT / NORMAL
+  start_date      DateTime?       // when task/event begins
+  due_date        DateTime?       // for EVENT / NORMAL (when task/event ends)
   repeat_interval Int?            // minutes (for HABIT, e.g., 180 = 3h)
   reminder_before Int?            // minutes before due_date (for EVENT, e.g., 30)
   reminder_every  Int?            // repeat interval before due_date (for EVENT, e.g., 10)

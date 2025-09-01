@@ -14,6 +14,7 @@ const addTask = async (req: Request, res: Response) => {
       title,
       type = "NORMAL",
       tags = [],
+      startDate,
       dueDate,
       repeat_interval,
       reminder_before,
@@ -27,6 +28,7 @@ const addTask = async (req: Request, res: Response) => {
         title,
         type,
         tags,
+        start_date: startDate ? new Date(startDate) : null,
         due_date: dueDate ? new Date(dueDate) : null,
         repeat_interval,
         reminder_before,
@@ -74,14 +76,14 @@ const addNotes = async (req: Request, res: Response) => {
       data: {
         title,
         content,
-        userId, 
+        userId,
       },
     });
     res.status(200).json(newNote);
   } catch (error) {
     console.error("Error adding notes:", error);
     res.status(500).json({ error: "Failed to add notes" });
-  } 
+  }
 }
 
 const getNotes = async (req: Request, res: Response) => {
@@ -92,10 +94,10 @@ const getNotes = async (req: Request, res: Response) => {
     }
 
     const notes = await prisma.notes.findMany({
-      where: { userId }, 
+      where: { userId },
     });
     res.status(200).json(notes);
-  } catch (error) {   
+  } catch (error) {
     console.error("Error fetching notes:", error);
     res.status(500).json({ error: "Failed to fetch notes" });
   }
@@ -122,11 +124,11 @@ const updateTask = async (req: Request, res: Response) => {
       reminder_every,
       channel,
       completed
-    } = req.body; 
+    } = req.body;
     const updatedTask = await prisma.task.update({
-      where: { 
+      where: {
         id: id as string,
-        userId 
+        userId
       },
       data: {
         title,
@@ -142,7 +144,7 @@ const updateTask = async (req: Request, res: Response) => {
     });
     res.status(200).json(updatedTask);
   } catch (error) {
-    console.error("Error updating task:", error); 
+    console.error("Error updating task:", error);
     res.status(500).json({ error: "Failed to update task" });
   }
 };
@@ -156,13 +158,13 @@ const updateNote = async (req: Request, res: Response) => {
 
     const { id } = req.params;
     if (!id) {
-      return res.status(400).json({ error: "Note id is required" });  
+      return res.status(400).json({ error: "Note id is required" });
     }
     const { title, content } = req.body;
     const updatedNote = await prisma.notes.update({
-      where: { 
+      where: {
         id: id as string,
-        userId 
+        userId
       },
       data: {
         title,
@@ -188,9 +190,9 @@ const deleteTask = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Task id is required" });
     }
     await prisma.task.delete({
-      where: { 
+      where: {
         id: id as string,
-        userId 
+        userId
       },
     });
 
@@ -212,13 +214,13 @@ const deleteNote = async (req: Request, res: Response) => {
     }
 
     const { id } = req.params;
-    if (!id) {  
+    if (!id) {
       return res.status(400).json({ error: "Note id is required" });
     }
     await prisma.notes.delete({
-      where: { 
+      where: {
         id: id as string,
-        userId 
+        userId
       },
     });
     res.status(204).send();

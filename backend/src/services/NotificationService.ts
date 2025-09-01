@@ -113,7 +113,7 @@ class NotificationService {
     try {
       const results = await Promise.allSettled(promises);
       const successCount = results.filter(r => r.status === 'fulfilled' && r.value).length;
-      console.log(`User notifications sent: ${successCount}/${promises.length} for task: ${payload.taskTitle}`);
+      // console.log(`User notifications sent: ${successCount}/${promises.length} for task: ${payload.taskTitle}`);
     } catch (error) {
       console.error('Error sending user notifications:', error);
     }
@@ -122,7 +122,7 @@ class NotificationService {
   // User-specific notification methods
   private async sendUserTelegramNotification(payload: UserNotificationPayload): Promise<boolean> {
     if (!payload.userSettings.telegramBotToken || !payload.userSettings.telegramChatId) {
-      console.log('User Telegram not configured, skipping notification');
+      // console.log('User Telegram not configured, skipping notification');
       return false;
     }
 
@@ -139,7 +139,7 @@ class NotificationService {
       await userBot.sendMessage(payload.userSettings.telegramChatId, message, {
         parse_mode: 'Markdown'
       });
-      console.log('User Telegram notification sent:', payload.taskTitle);
+      // console.log('User Telegram notification sent:', payload.taskTitle);
       return true;
     } catch (error) {
       console.error('Failed to send user Telegram notification:', error);
@@ -149,7 +149,7 @@ class NotificationService {
 
   private async sendUserDiscordNotification(payload: UserNotificationPayload): Promise<boolean> {
     if (!payload.userSettings.discordBotToken || !payload.userSettings.discordChannelId) {
-      console.log('User Discord not configured, skipping notification');
+      // console.log('User Discord not configured, skipping notification');
       return false;
     }
 
@@ -176,7 +176,7 @@ class NotificationService {
       });
       
       await channel.send(message);
-      console.log('User Discord notification sent:', payload.taskTitle);
+      // console.log('User Discord notification sent:', payload.taskTitle);
       
       // Clean up the client
       await userDiscordClient.destroy();
@@ -189,7 +189,7 @@ class NotificationService {
 
   private async sendUserGmailNotification(payload: UserNotificationPayload): Promise<boolean> {
     if (!this.gmailTransporter || !payload.userSettings.gmailTo) {
-      console.log('User Gmail not configured or transporter not available, skipping notification');
+      // console.log('User Gmail not configured or transporter not available, skipping notification');
       return false;
     }
 
@@ -210,7 +210,7 @@ class NotificationService {
         html: `<pre style="font-family: 'Courier New', monospace; background: #f0f0f0; padding: 10px; border-radius: 5px;">${message}</pre>`
       });
 
-      console.log('User Gmail notification sent to:', payload.userSettings.gmailTo);
+      // console.log('User Gmail notification sent to:', payload.userSettings.gmailTo);
       return true;
     } catch (error) {
       console.error('Failed to send user Gmail notification:', error);
@@ -418,7 +418,7 @@ If you have any questions, please contact our support team.
         html: htmlContent
       });
 
-      console.log('Password reset email sent successfully to:', email);
+      // console.log('Password reset email sent successfully to:', email);
       return true;
     } catch (error) {
       console.error('Failed to send password reset email:', error);
@@ -429,8 +429,8 @@ If you have any questions, please contact our support team.
   // Temporary fallback for old sendNotification method (scheduled notifications)
   // TODO: Implement user-specific scheduled notifications
   async sendNotification(payload: NotificationPayload): Promise<void> {
-    console.log('📅 Scheduled notification system temporarily disabled - user-specific notifications only');
-    console.log('Task:', payload.taskTitle, 'Channels:', payload.channels);
+    // console.log('📅 Scheduled notification system temporarily disabled - user-specific notifications only');
+    // console.log('Task:', payload.taskTitle, 'Channels:', payload.channels);
     // For now, just log the notification instead of sending it
     // In the future, this should get user settings and call sendUserNotification
   }

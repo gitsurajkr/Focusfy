@@ -25,7 +25,7 @@ rootRouter.use(decodeUser);
 rootRouter.get('/user/me', async (req, res) => {
   try {
     const userId = req.user?.userId;
-    console.log('user/me: userId:', userId);
+    // console.log('user/me: userId:', userId);
     if (!userId) {
       return res.status(401).json({ error: 'Authentication required' });
     }
@@ -42,11 +42,11 @@ rootRouter.get('/user/me', async (req, res) => {
         gmailTo: true
       }
     });
-    console.log('user/me: User found in DB:', user);
+    // console.log('user/me: User found in DB:', user);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-    console.log('user/me: Sending response:', { user });
+    // console.log('user/me: Sending response:', { user });
     res.json({ user });
   } catch (error) {
     console.error('user/me: Error:', error);
