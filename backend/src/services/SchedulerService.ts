@@ -6,8 +6,11 @@ const prisma = new PrismaClient();
 
 class SchedulerService {
   private jobs: Map<string, any> = new Map();
+  private serverStartTime: Date;
+  private readonly STARTUP_GRACE_PERIOD = 5 * 60 * 1000; // 5 minutes in milliseconds
 
   constructor() {
+    this.serverStartTime = new Date();
     this.initializeScheduler();
   }
 
@@ -22,8 +25,15 @@ class SchedulerService {
 
   private async checkPendingNotifications() {
     try {
-      console.log('Checking for pending notifications...');
       const now = new Date();
+      
+      // Skip notifications for first 5 minutes after server start to prevent login spam
+      const timeSinceStartup = now.getTime() - this.serverStartTime.getTime();
+      if (timeSinceStartup < this.STARTUP_GRACE_PERIOD) {
+        return; // Silent during grace period to avoid console spam
+      }
+      
+      console.log('Checking for pending notifications...');
       const tasks = await prisma.task.findMany({
         where: {
           completed: false,
@@ -91,8 +101,9 @@ class SchedulerService {
     if (task.reminder_before && minutesUntilDue <= task.reminder_before && minutesUntilDue > 0) {
       // console.log(`Task "${task.title}" needs reminder (${minutesUntilDue}min until due)`);
       const lastNotified = await this.getLastNotificationTime(task.id, 'reminder_before');
+      const minInterval = Math.max(task.reminder_every || 10, 5); // Minimum 5 minutes between notifications
       const shouldNotify = !lastNotified || 
-        (now.getTime() - lastNotified.getTime()) >= (task.reminder_every || 10) * 60 * 1000;
+        (now.getTime() - lastNotified.getTime()) >= minInterval * 60 * 1000;
 
       if (shouldNotify) {
         // console.log(`Sending reminder for "${task.title}"`);
@@ -257,11 +268,25 @@ class SchedulerService {
   }
 
   private async getLastNotificationTime(taskId: string, type: string): Promise<Date | null> {
-    // For now, we'll use a simple in-memory cache
+    // For now, we'll use a simple in-memory cache with smart anti-spam logic
     // In production, you'd want to store this in the database
     const key = `${taskId}_${type}`;
     const cached = this.notificationCache.get(key);
-    return cached || null;
+    
+    // If we have cache, use it
+    if (cached) {
+      return cached;
+    }
+    
+    // ANTI-SPAM: If no cache (server restart), assume we notified recently
+    // This prevents notification spam on server restart/login
+    const timeSinceStartup = new Date().getTime() - this.serverStartTime.getTime();
+    if (timeSinceStartup < this.STARTUP_GRACE_PERIOD) {
+      // Pretend we notified recently during grace period
+      return new Date(Date.now() - 60000); // 1 minute ago
+    }
+    
+    return null;
   }
 
   private async updateLastNotificationTime(taskId: string, type: string): Promise<void> {

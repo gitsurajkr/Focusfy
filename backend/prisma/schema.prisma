@@ -1,12 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  // output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -15,58 +8,51 @@ datasource db {
 }
 
 model User {
-  id String @id @default(uuid())
-  email String @unique
-  password String
-  name String?
-
-  telegramBotToken   String?
-  telegramChatId     String?
-  discordBotToken    String?
-  discordChannelId   String?
-  gmailTo            String?
-  
-  // Password reset fields
-  resetToken         String?
-  resetTokenExpires  DateTime?
-  
-  tasks     Task[]
-
-  notes     Notes[]
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
+  id                String    @id @default(uuid())
+  email             String    @unique
+  password          String
+  name              String?
+  telegramBotToken  String?
+  telegramChatId    String?
+  discordBotToken   String?
+  discordChannelId  String?
+  gmailTo           String?
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+  resetToken        String?
+  resetTokenExpires DateTime?
+  notes             Notes[]
+  tasks             Task[]
 }
 
 model Task {
-  id              String    @id @default(uuid())
-  title           String
-  type            Type      @default(NORMAL)
-  tags            String[]
-  start_date      DateTime?       // when task/event begins
-  due_date        DateTime?       // for EVENT / NORMAL (when task/event ends)
-  repeat_interval Int?            // minutes (for HABIT, e.g., 180 = 3h)
-  reminder_before Int?            // minutes before due_date (for EVENT, e.g., 30)
-  reminder_every  Int?            // repeat interval before due_date (for EVENT, e.g., 10)
-  channel         String[]        // ["telegram", "discord"]
-
-  user        User     @relation(fields: [userId], references: [id])
-  userId      String
-  completed       Boolean   @default(false)
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
+  id                   String    @id @default(uuid())
+  title                String
+  tags                 String[]
+  due_date             DateTime?
+  completed            Boolean   @default(false)
+  created_at           DateTime  @default(now())
+  updated_at           DateTime  @updatedAt
+  channel              String[]
+  reminder_before      Int?
+  reminder_every       Int?
+  repeat_interval      Int?
+  type                 Type      @default(NORMAL)
+  userId               String
+  start_date           DateTime?
+  lastNotificationType String?
+  lastNotifiedAt       DateTime?
+  user                 User      @relation(fields: [userId], references: [id])
 }
 
 model Notes {
   id         String   @id @default(uuid())
   title      String?
   content    String
-
-  user        User     @relation(fields: [userId], references: [id])
-  userId      String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
 }
 
 enum Type {
@@ -74,36 +60,3 @@ enum Type {
   HABIT
   NORMAL
 }
-
-
-// {
-//   "title": "Codeforces Contest",
-//   "type": "EVENT",
-//   "due_date": "2025-08-25T20:00:00Z",
-//   "reminder_before": 30,
-//   "reminder_every": 10,
-//   "channel": ["telegram"]
-// }
-
-// {
-//   "title": "Study AIML",
-//   "type": "NORMAL",
-//   "tags": ["study", "ml"],
-//   "reminder_every": "3h",
-//   "channel": ["telegram", "discord"]
-// }
-
-
-// Notification Examples
-
-// For EVENT (contest):
-// "Reminder: Codeforces contest starts in 30 mins!"
-// → Sent every 10 mins until start.
-
-// For NORMAL (study AIML):
-// "Reminder: Time to study AIML 📘"
-// → Sent every 3 hours.
-
-// For HABBIT (Workout):
-// "Reminder: Don’t forget your workout 💪"
-// → Sent daily at fixed time.
