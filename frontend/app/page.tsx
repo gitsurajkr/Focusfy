@@ -14,6 +14,7 @@ export default function Home() {
   const { token, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<'tasks' | 'notes'>('tasks');
   const [taskSubTab, setTaskSubTab] = useState<'create' | 'view'>('view');
+  const [taskFilter, setTaskFilter] = useState<'ALL' | 'EVENT' | 'HABIT' | 'NORMAL' | 'COMPLETED' | 'OVERDUE' | 'ACTIVE' | 'DUE_TODAY'>('ALL');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
 
@@ -142,12 +143,21 @@ export default function Home() {
           ) : (
             // View Tasks Section
             <div className="space-y-6">
-              <TaskStats tasks={tasks} />
+              <TaskStats 
+                tasks={tasks} 
+                onFilterChange={setTaskFilter}
+                currentFilter={taskFilter}
+              />
               <div className="pixel-border bg-[#181825]/80 p-6 shadow-lg">
                 <h2 className="text-xl font-bold text-center mb-6 gaming-accent pixel-font uppercase tracking-wide">
                   ACTIVE MISSIONS ({tasks.length})
                 </h2>
-                <TaskList tasks={tasks} onTaskUpdate={handleTaskUpdate} />
+                <TaskList 
+                  tasks={tasks} 
+                  onTaskUpdate={handleTaskUpdate}
+                  filter={taskFilter}
+                  onFilterChange={setTaskFilter}
+                />
               </div>
             </div>
           )

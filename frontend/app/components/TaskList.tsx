@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import api from '../../lib/api';
 import { showToast } from '../../lib/toast';
 import { Task, ApiError } from '../../types';
@@ -8,10 +9,26 @@ import { Task, ApiError } from '../../types';
 interface TaskListProps {
   tasks: Task[];
   onTaskUpdate: () => void;
+  filter?: 'ALL' | 'EVENT' | 'HABIT' | 'NORMAL' | 'COMPLETED' | 'OVERDUE' | 'ACTIVE' | 'DUE_TODAY';
+  onFilterChange?: (filter: 'ALL' | 'EVENT' | 'HABIT' | 'NORMAL' | 'COMPLETED' | 'OVERDUE' | 'ACTIVE' | 'DUE_TODAY') => void;
 }
 
-export default function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
-  const [filter, setFilter] = useState<'ALL' | 'EVENT' | 'HABIT' | 'NORMAL' | 'COMPLETED'>('ALL');
+export default function TaskList({ tasks, onTaskUpdate, filter: externalFilter, onFilterChange }: TaskListProps) {
+  // const { token } = useAuth();
+  const [filter, setFilter] = useState<'ALL' | 'EVENT' | 'HABIT' | 'NORMAL' | 'COMPLETED' | 'OVERDUE' | 'ACTIVE' | 'DUE_TODAY'>(externalFilter || 'ALL');
+  
+  // Sync with external filter changes
+  useEffect(() => {
+    if (externalFilter) {
+      setFilter(externalFilter);
+    }
+  }, [externalFilter]);
+
+  // Handle filter changes
+  const handleFilterChange = (newFilter: typeof filter) => {
+    setFilter(newFilter);
+    onFilterChange?.(newFilter);
+  };
   const getTaskIcon = (type: string) => {
     switch (type) {
       case 'EVENT':
@@ -31,7 +48,12 @@ export default function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
     const isOverdue = date < now;
     const minutesUntilDue = Math.floor((date.getTime() - now.getTime()) / (1000 * 60));
     
-    const dateStr = date.toLocaleDateString();
+    // Use a clear, unambiguous date format: "Sep 1, 2025" instead of "01/09/2025"
+    const dateStr = date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric', 
+      year: 'numeric' 
+    });
     const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
     
     if (isOverdue) {
@@ -50,6 +72,61 @@ export default function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
         return `${dateStr} ${timeStr} (in ${hoursUntilDue}h)`;
       }
     }
+  };
+
+  const formatSimpleDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  const calculateTimeLeft = (startDate?: string, endDate?: string) => {
+    const now = new Date();
+    
+    if (!startDate && !endDate) return null;
+    
+    // If task hasn't started yet
+    if (startDate && new Date(startDate) > now) {
+      const timeToStart = new Date(startDate).getTime() - now.getTime();
+      const days = Math.floor(timeToStart / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeToStart % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeToStart % (1000 * 60 * 60)) / (1000 * 60));
+      
+      if (days > 0) return `Starts in ${days}d ${hours}h`;
+      if (hours > 0) return `Starts in ${hours}h ${minutes}m`;
+      return `Starts in ${minutes}m`;
+    }
+    
+    // If task is ongoing or we only have end date
+    if (endDate) {
+      const timeToEnd = new Date(endDate).getTime() - now.getTime();
+      
+      if (timeToEnd < 0) {
+        const overdue = Math.abs(timeToEnd);
+        const days = Math.floor(overdue / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((overdue % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        
+        if (days > 0) return `⚠️ Overdue by ${days}d ${hours}h`;
+        if (hours > 0) return `⚠️ Overdue by ${hours}h`;
+        return `⚠️ Overdue`;
+      } else {
+        const days = Math.floor(timeToEnd / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeToEnd % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeToEnd % (1000 * 60 * 60)) / (1000 * 60));
+        
+        if (days > 0) return `${days}d ${hours}h left`;
+        if (hours > 0) return `${hours}h ${minutes}m left`;
+        return `${minutes}m left`;
+      }
+    }
+    
+    return null;
   };
 
   const toggleTaskComplete = async (task: Task) => {
@@ -77,7 +154,7 @@ export default function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
       const loadingToastId = showToast.loading('Deleting quest...');
       try {
         await api.delete(`/api/delete-task/${taskId}`);
-        showToast.update(loadingToastId, 'Quest deleted successfully! 🗑️', 'success');
+        showToast.update(loadingToastId, 'Quest deleted successfully!', 'success');
         onTaskUpdate();
       } catch (error) {
         const apiError = error as ApiError;
@@ -89,8 +166,28 @@ export default function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
   };
 
   const filteredTasks = tasks.filter(task => {
+    const now = new Date();
+    
     if (filter === 'ALL') return true;
     if (filter === 'COMPLETED') return task.completed;
+    
+    // Time-based filters
+    if (filter === 'OVERDUE') {
+      return !task.completed && task.due_date && new Date(task.due_date) < now;
+    }
+    if (filter === 'ACTIVE') {
+      if (task.completed) return false;
+      const hasStarted = !task.start_date || new Date(task.start_date) <= now;
+      const notEnded = !task.due_date || new Date(task.due_date) > now;
+      return hasStarted && notEnded;
+    }
+    if (filter === 'DUE_TODAY') {
+      if (task.completed || !task.due_date) return false;
+      const dueDate = new Date(task.due_date);
+      return dueDate.toDateString() === now.toDateString();
+    }
+    
+    // Task type filters
     return task.type === filter;
   });
 
@@ -116,7 +213,7 @@ export default function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
         {['ALL', 'EVENT', 'HABIT', 'NORMAL', 'COMPLETED'].map((filterType) => (
             <button
             key={filterType}
-            onClick={() => setFilter(filterType as typeof filter)}
+            onClick={() => handleFilterChange(filterType as typeof filter)}
             className={`px-3 py-1 rounded pixel-border pixel-font text-xs bg-gradient-to-r from-blue-600 to-purple-600 hover:from-cyan-400 hover:to-blue-500 transition-all ${
               filter === filterType 
               ? filterType === 'EVENT' 
@@ -194,33 +291,56 @@ export default function TaskList({ tasks, onTaskUpdate }: TaskListProps) {
 
               {/* Task Details */}
               <div className="text-xs space-y-1">
+                {/* Time Left - Most Important Information */}
+                {(() => {
+                  const timeLeft = calculateTimeLeft(task.start_date, task.due_date);
+                  if (timeLeft) {
+                    return (
+                      <div className="flex items-center gap-1 font-bold">
+                        <span className={timeLeft.includes('Overdue') ? 'text-red-400' : 'text-cyan-400'}>
+                          ⏰ {timeLeft}
+                        </span>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+
+                {/* Start Date */}
+                {task.start_date && (
+                  <div className="flex items-center gap-1">
+                    <span>🚀 Starts: {formatSimpleDate(task.start_date)}</span>
+                  </div>
+                )}
+
+                {/* End Date */}
                 {task.due_date && (
                   <div className="flex items-center gap-1">
-                    <span>Due: {formatDate(task.due_date)}</span>
+                    <span>🏁 Ends: {formatSimpleDate(task.due_date)}</span>
                   </div>
                 )}
                 
                 {task.repeat_interval && (
                   <div className="flex items-center gap-1">
-                    <span>Every {task.repeat_interval} mins</span>
+                    <span>🔄 Every {task.repeat_interval} mins</span>
                   </div>
                 )}
 
                 {task.reminder_before && (
                   <div className="flex items-center gap-1">
-                    <span>Remind {task.reminder_before} mins before</span>
+                    <span>🔔 Remind {task.reminder_before} mins before</span>
                   </div>
                 )}
 
                 {task.reminder_every && (
                   <div className="flex items-center gap-1">
-                    <span>Remind every {task.reminder_every} mins</span>
+                    <span>🔔 Remind every {task.reminder_every} mins</span>
                   </div>
                 )}
 
                 {task.channel.length > 0 && (
                   <div className="flex items-center gap-1">
-                    <span>Notify: {task.channel.join(', ')}</span>
+                    <span>📢 Notify: {task.channel.join(', ')}</span>
                   </div>
                 )}
               </div>

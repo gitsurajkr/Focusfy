@@ -17,6 +17,7 @@ export interface Task {
   title: string;
   type: 'NORMAL' | 'HABIT' | 'EVENT';
   tags: string[];
+  start_date?: string;
   due_date?: string;
   repeat_interval?: number;
   reminder_before?: number;
