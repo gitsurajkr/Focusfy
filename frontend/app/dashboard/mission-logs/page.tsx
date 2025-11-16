@@ -1,0 +1,106 @@
+"use client"
+
+import { Calendar, User, Tag, Loader2 } from "lucide-react"
+import { useTasks } from "@/hooks/useTasks"
+import { useAuth } from "@/contexts/AuthContext"
+
+export default function MissionLogsPage() {
+  const { tasks, loading } = useTasks()
+  const { user } = useAuth()
+
+  // Group tasks by status for mission logs display
+  const missions = (tasks || []).map(task => ({
+    id: task.id,
+    mission: task.title,
+    date: new Date(task.created_at).toISOString().split('T')[0],
+    user: user?.name || "You",
+    status: task.completed ? 'Completed' : 'In Progress',
+    tags: task.tags.length > 0 ? task.tags : ['No tags'],
+  }))
+
+  const getStatusColor = (status: string) => {
+    if (status === "Completed") return "bg-secondary/10 text-secondary"
+    return "bg-primary/10 text-primary"
+  }
+
+  if (loading) {
+    return (
+      <div className="p-6 max-w-6xl mx-auto">
+        <div className="text-center py-12">
+          <Loader2 className="animate-spin mx-auto mb-4 text-primary" size={32} />
+          <p className="text-muted-foreground">Loading mission logs...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="p-6 max-w-6xl mx-auto">
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl font-bold text-foreground">Mission Logs</h1>
+        <p className="text-muted-foreground mt-1">Track your major projects and milestones</p>
+      </div>
+
+      {/* Timeline */}
+      <div className="mt-6 space-y-4">
+        {missions.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No mission logs yet. Complete some tasks to see them here!</p>
+          </div>
+        ) : (
+          missions.map((log, index) => (
+          <div key={log.id} className="relative">
+            {/* Timeline connector */}
+            {index < missions.length - 1 && <div className="absolute left-6 top-12 w-0.5 h-8 bg-border"></div>}
+
+            {/* Log item */}
+            <div className="flex gap-4">
+              {/* Timeline dot */}
+              <div className="relative flex flex-col items-center">
+                <div
+                  className={`w-3 h-3 rounded-full ${log.status === "Completed" ? "bg-secondary" : "bg-primary"} ring-4 ring-card`}
+                ></div>
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 pb-4">
+                <div className="bg-card border border-border rounded-xl p-4 hover:shadow-md transition-smooth">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-foreground">{log.mission}</h3>
+                    <span className={`px-3 py-1 rounded-lg text-sm font-medium ${getStatusColor(log.status)}`}>
+                      {log.status}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-3">
+                    <span className="flex items-center gap-2">
+                      <Calendar size={16} />
+                      {log.date}
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <User size={16} />
+                      {log.user}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {log.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 bg-muted text-muted-foreground text-xs rounded-lg"
+                      >
+                        <Tag size={12} />
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )))}
+      </div>
+    </div>
+  )
+}

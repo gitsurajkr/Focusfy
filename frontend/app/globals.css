@@ -1,208 +1,174 @@
-
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Press+Start+2P&display=swap');
 @import "tailwindcss";
 
-body {
-  @apply bg-gradient-to-br from-[#181825] via-[#232946] to-[#0f1021] min-h-screen text-white;
-  font-family: 'Orbitron', 'Exo 2', 'Press Start 2P', monospace, sans-serif;
-  font-size: 15px;
-  letter-spacing: 0.01em;
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Light mode - Clean, minimal palette */
+  --background: 0 0% 98%;
+  --foreground: 0 0% 7%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 7%;
+  --primary: 249 89% 60%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 142 71% 45%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 0 0% 93%;
+  --muted-foreground: 0 0% 45%;
+  --accent: 142 71% 45%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 89%;
+  --input: 0 0% 96%;
+  --ring: 249 89% 60%;
+  --chart-1: 249 89% 60%;
+  --chart-2: 142 71% 45%;
+  --chart-3: 38 92% 50%;
+  --chart-4: 217 91% 60%;
+  --chart-5: 0 84% 60%;
+  --radius: 0.75rem;
+  --sidebar: 0 0% 100%;
+  --sidebar-foreground: 0 0% 7%;
+  --sidebar-primary: 249 89% 60%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 142 71% 45%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-border: 0 0% 89%;
+  --sidebar-ring: 249 89% 60%;
 }
 
-/* Sleek pixel border utility */
-.pixel-border {
-  border: 2.5px solid #00f5ff;
-  border-radius: 0.75rem;
-  box-shadow: 0 2px 16px 0 #00f5ff33, 0 0 0 2px #232946;
-  background-clip: padding-box;
+.dark {
+  /* Dark mode - Premium, sophisticated palette */
+  --background: 216 14% 8%;
+  --foreground: 210 40% 98%;
+  --card: 216 13% 12%;
+  --card-foreground: 210 40% 98%;
+  --popover: 216 13% 12%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 249 89% 65%;
+  --primary-foreground: 216 14% 8%;
+  --secondary: 142 71% 50%;
+  --secondary-foreground: 216 14% 8%;
+  --muted: 216 13% 20%;
+  --muted-foreground: 210 15% 65%;
+  --accent: 142 71% 50%;
+  --accent-foreground: 216 14% 8%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 216 13% 18%;
+  --input: 216 13% 16%;
+  --ring: 249 89% 65%;
+  --chart-1: 249 89% 65%;
+  --chart-2: 142 71% 50%;
+  --chart-3: 38 92% 55%;
+  --chart-4: 217 91% 65%;
+  --chart-5: 0 84% 65%;
+  --sidebar: 216 13% 11%;
+  --sidebar-foreground: 210 40% 98%;
+  --sidebar-primary: 249 89% 65%;
+  --sidebar-primary-foreground: 216 14% 8%;
+  --sidebar-accent: 142 71% 50%;
+  --sidebar-accent-foreground: 216 14% 8%;
+  --sidebar-border: 216 13% 18%;
+  --sidebar-ring: 249 89% 65%;
 }
 
-/* Pixel shadow utility (subtle) */
-.pixel-shadow {
-  box-shadow: 2px 2px 0 #232946, 4px 4px 0 #00f5ff33;
+@theme inline {
+  --font-sans: "Geist", "Geist Fallback";
+  --font-mono: "Geist Mono", "Geist Mono Fallback";
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
 }
 
-/* Gaming accent text */
-.gaming-accent {
-  background: linear-gradient(90deg, #00f5ff 0%, #7c3aed 50%, #ff3366 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-fill-color: transparent;
-}
-
-/* Pixel font utility (less blocky) */
-.pixel-font {
-  font-family: 'Orbitron', 'Press Start 2P', monospace;
-  letter-spacing: 0.04em;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #232946;
-}
-::-webkit-scrollbar-thumb {
-  background: #00f5ff;
-  border-radius: 4px;
-}
-
-
-/* Sleek gaming button */
-.gaming-btn {
-  font-family: 'Orbitron', 'Press Start 2P', monospace;
-  font-size: 1rem;
-  padding: 0.6rem 1.5rem;
-  border: none;
-  border-radius: 0.75rem;
-  cursor: pointer;
-  display: inline-block;
-  text-decoration: none;
-  background: linear-gradient(90deg, #00f5ff 0%, #7c3aed 100%);
-  color: #fff;
-  box-shadow: 0 2px 12px 0 #00f5ff33;
-  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
-}
-.gaming-btn:hover {
-  background: linear-gradient(90deg, #ff3366 0%, #00f5ff 100%);
-  box-shadow: 0 4px 24px 0 #ff336655;
-  transform: translateY(-2px) scale(1.03);
-}
-.gaming-btn:active {
-  background: linear-gradient(90deg, #7c3aed 0%, #00f5ff 100%);
-  box-shadow: 0 1px 6px 0 #7c3aed55;
-  transform: scale(0.98);
-}
-
-
-/* Sleek gaming input */
-.gaming-input {
-  font-family: 'Orbitron', 'Press Start 2P', monospace;
-  font-size: 1rem;
-  padding: 0.6rem 1rem;
-  background: #181825;
-  border: 2px solid #00f5ff;
-  border-radius: 0.75rem;
-  color: #fff;
-  outline: none;
-  box-shadow: 0 1px 8px 0 #00f5ff22;
-  transition: border 0.2s, box-shadow 0.2s;
-}
-.gaming-input:focus {
-  border-color: #ff3366;
-  box-shadow: 0 2px 16px 0 #ff336655;
-  background: #232946;
-}
-
-
-/* Task type colors (modern) */
-.task-event {
-  background: linear-gradient(90deg, #ff3366 0%, #7c3aed 100%) !important;
-  border-color: #ff3366 !important;
-}
-.task-habit {
-  background: linear-gradient(90deg, #10b981 0%, #00f5ff 100%) !important;
-  border-color: #10b981 !important;
-}
-.task-normal {
-  background: linear-gradient(90deg, #7c3aed 0%, #00f5ff 100%) !important;
-  border-color: #7c3aed !important;
-}
-.task-completed {
-  opacity: 0.6;
-  text-decoration: line-through;
-  background: #232946 !important;
-}
-
-
-/* Sleek card */
-.gaming-card {
-  background: #232946cc;
-  border: 2.5px solid #00f5ff;
-  border-radius: 0.75rem;
-  box-shadow: 0 2px 16px 0 #00f5ff22;
-  padding: 2rem 1.5rem;
-  margin: 1rem 0;
-}
-
-
-/* Pixel icon (optional, modern) */
-.pixel-icon {
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  image-rendering: pixelated;
-  background-size: contain;
-  filter: drop-shadow(0 1px 2px #00f5ff66);
-}
-
-
-@keyframes gaming-complete {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.08); box-shadow: 0 0 12px #00f5ff99; }
-  100% { transform: scale(1); }
-}
-.task-complete-animation {
-  animation: gaming-complete 0.3s cubic-bezier(.4,2,.6,1);
-}
-
-
-@media (max-width: 768px) {
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
   body {
-    font-size: 13px;
+    @apply bg-background text-foreground;
   }
-  .gaming-btn {
-    font-size: 0.9rem;
-    padding: 0.5rem 1rem;
-  }
-  .gaming-input {
-    font-size: 0.9rem;
-    padding: 0.5rem 0.8rem;
+  html {
+    @apply scroll-smooth;
   }
 }
 
+/* Smooth transitions and animations */
+@layer utilities {
+  .transition-smooth {
+    @apply transition-all duration-200 ease-out;
+  }
 
-/* Toast Styling for Gaming Theme */
-.gaming-toast {
-  font-family: 'Orbitron', 'Press Start 2P', monospace !important;
-  font-size: 1rem !important;
-  line-height: 1.5 !important;
-  border: 2px solid #00f5ff !important;
-  box-shadow: 0 2px 16px 0 #00f5ff22 !important;
-  border-radius: 0.75rem !important;
-  padding: 14px 18px !important;
-  background: #232946ee !important;
-  color: #fff !important;
-}
-.gaming-toast.Toastify__toast--success {
-  background: linear-gradient(90deg, #10b981 0%, #00f5ff 100%) !important;
-  color: #fff !important;
-}
-.gaming-toast.Toastify__toast--error {
-  background: linear-gradient(90deg, #ff3366 0%, #7c3aed 100%) !important;
-  color: #fff !important;
-}
-.gaming-toast.Toastify__toast--info {
-  background: linear-gradient(90deg, #7c3aed 0%, #00f5ff 100%) !important;
-  color: #fff !important;
-}
-.gaming-toast.Toastify__toast--warning {
-  background: linear-gradient(90deg, #f59e42 0%, #ff3366 100%) !important;
-  color: #fff !important;
-}
-.gaming-toast.Toastify__toast--default {
-  background: #232946ee !important;
-  color: #fff !important;
-}
-.gaming-toast .Toastify__progress-bar {
-  background: #00f5ff !important;
-  height: 3px !important;
-}
-.gaming-toast .Toastify__close-button {
-  color: #fff !important;
-  opacity: 1 !important;
-  font-size: 1.1rem !important;
+  .fade-in {
+    animation: fadeIn 300ms ease-out;
+  }
+
+  .scale-in {
+    animation: scaleIn 300ms ease-out;
+  }
+
+  /* Added glassmorphism effect for premium feel */
+  .glass {
+    @apply backdrop-blur-md bg-white/10 dark:bg-white/5;
+  }
+
+  /* Enhanced shadow for depth */
+  .shadow-premium {
+    @apply shadow-lg dark:shadow-xl dark:shadow-black/30;
+  }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

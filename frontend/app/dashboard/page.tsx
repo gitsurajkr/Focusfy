@@ -1,0 +1,325 @@
+"use client"
+
+import { CheckCircle2, BookMarked, Zap, Calendar, Target, ArrowUpRight, TrendingUp } from 'lucide-react'
+import Link from "next/link"
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"
+import { useTasks } from "@/hooks/useTasks"
+import { useNotes } from "@/hooks/useNotes"
+import { useAuth } from "@/contexts/AuthContext"
+import { useMemo } from "react"
+import { taskApi } from "@/lib/api"
+
+export default function DashboardPage() {
+  const { user } = useAuth()
+  const { tasks, loading: tasksLoading, updateTask } = useTasks()
+  const { notes, loading: notesLoading } = useNotes()
+
+  const handleToggleTask = async (taskId: string, completed: boolean) => {
+    try {
+      await taskApi.updateTask(taskId, { completed: !completed })
+      updateTask(taskId, { completed: !completed })
+    } catch (error) {
+      console.error('Failed to toggle task:', error)
+    }
+  }
+
+  // Calculate statistics from real data
+  const stats = useMemo(() => {
+    const completedTasks = tasks?.filter(t => t.completed).length || 0
+    const activeTasks = tasks?.filter(t => !t.completed).length || 0
+    
+    return [
+      {
+        label: "Tasks Completed",
+        value: completedTasks.toString(),
+        icon: CheckCircle2,
+        color: "from-primary/20 to-primary/5",
+        iconBg: "bg-primary/15",
+        iconColor: "text-primary",
+      },
+      {
+        label: "Notes Created",
+        value: (notes?.length || 0).toString(),
+        icon: BookMarked,
+        color: "from-secondary/20 to-secondary/5",
+        iconBg: "bg-secondary/15",
+        iconColor: "text-secondary",
+      },
+      {
+        label: "Active Tasks",
+        value: activeTasks.toString(),
+        icon: Zap,
+        color: "from-amber-500/20 to-amber-500/5",
+        iconBg: "bg-amber-500/15",
+        iconColor: "text-amber-500",
+      },
+    ]
+  }, [tasks, notes])
+
+  const taskBreakdown = useMemo(() => {
+    const completed = tasks?.filter(t => t.completed).length || 0
+    const active = tasks?.filter(t => !t.completed).length || 0
+    const total = tasks?.length || 1 // Avoid division by zero
+    
+    return [
+      { name: "Completed", value: completed, fill: "#6366F1", percentage: Math.round((completed / total) * 100) },
+      { name: "Active", value: active, fill: "#10B981", percentage: Math.round((active / total) * 100) },
+    ]
+  }, [tasks])
+
+  const recentTasks = useMemo(() => {
+    return (tasks || [])
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 3)
+      .map(task => ({
+        id: task.id,
+        title: task.title,
+        completed: task.completed,
+        due: task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No due date',
+        tags: task.tags.join(', ') || 'No tags',
+      }))
+  }, [tasks])
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 dark:from-background dark:via-background dark:to-muted/10">
+      <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight">
+                Welcome back, {user?.name || 'User'}
+              </h1>
+              <p className="text-muted-foreground mt-3 text-lg">Here's your productivity snapshot for today</p>
+            </div>
+
+          </div>
+        </div>
+
+        {(tasksLoading || notesLoading) ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Loading your data...</p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {stats.map((stat, i) => (
+            <div
+              key={i}
+              className={`group relative overflow-hidden rounded-2xl border border-border/40 dark:border-border/60 backdrop-blur-sm hover:border-primary/40 dark:hover:border-primary/50 transition-all duration-300`}
+            >
+              <div
+                className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-50 dark:opacity-30 group-hover:opacity-75 transition-opacity`}
+              />
+              <div className="relative p-6 space-y-4">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+                    <p className="text-4xl font-bold text-foreground">{stat.value}</p>
+                  </div>
+                  <div className={`${stat.iconBg} p-3 rounded-xl group-hover:scale-110 transition-transform`}>
+                    <stat.icon size={24} className={stat.iconColor} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
+            <div className="group h-full rounded-2xl border border-border/40 dark:border-border/60 bg-card/50 dark:bg-card/30 backdrop-blur-sm hover:border-primary/40 dark:hover:border-primary/50 p-6 transition-all hover:shadow-premium">
+              <h3 className="text-base font-semibold text-foreground mb-6 flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-primary/15 dark:bg-primary/10">
+                  <Target size={18} className="text-primary" />
+                </div>
+                Task Overview
+              </h3>
+
+              <div className="space-y-6">
+                <div className="flex justify-center relative">
+                  <ResponsiveContainer width="100%" height={280}>
+                    <PieChart>
+                      <Pie
+                        data={taskBreakdown}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={70}
+                        outerRadius={100}
+                        paddingAngle={4}
+                        dataKey="value"
+                        animationBegin={0}
+                        animationDuration={800}
+                        animationEasing="ease-out"
+                      >
+                        {taskBreakdown.map((entry, index) => (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={entry.fill}
+                            className="hover:opacity-80 transition-opacity"
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "hsl(var(--card))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: "0.75rem",
+                          boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)",
+                          padding: "12px 16px",
+                        }}
+                        labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 700, fontSize: "14px" }}
+                        formatter={(value, name, props) => [
+                          `${value} tasks`,
+                          props.payload.name
+                        ]}
+                        cursor={{ fill: "rgba(0, 0, 0, 0.05)" }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <div className="text-3xl font-bold text-foreground">{tasks?.length || 0}</div>
+                    <div className="text-xs text-muted-foreground font-medium">Total Tasks</div>
+                  </div>
+                </div>
+
+                <div className="space-y-4 pt-6 border-t border-border/40 dark:border-border/20">
+                  {taskBreakdown.map((item, i) => (
+                    <div
+                      key={i}
+                      className="group/item cursor-pointer transition-all"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="w-3.5 h-3.5 rounded-full transition-transform group-hover/item:scale-125 shadow-sm"
+                            style={{ backgroundColor: item.fill }}
+                          />
+                          <span className="text-sm font-semibold text-foreground">
+                            {item.name}
+                          </span>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-foreground">{item.value}</p>
+                          <p className="text-xs text-muted-foreground">{item.percentage}%</p>
+                        </div>
+                      </div>
+                      
+                      <div className="w-full bg-muted/40 dark:bg-muted/20 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500 group-hover/item:shadow-lg"
+                          style={{
+                            backgroundColor: item.fill,
+                            width: `${item.percentage}%`,
+                            opacity: 0.9,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <div className="pt-4 mt-4 border-t border-border/40 dark:border-border/20 grid grid-cols-2 gap-2">
+                    <div className="text-center p-2 rounded-lg bg-muted/30 dark:bg-muted/10">
+                      <p className="text-xs text-muted-foreground">Completed</p>
+                      <p className="text-sm font-bold text-foreground">{taskBreakdown[0]?.percentage || 0}%</p>
+                    </div>
+                    <div className="text-center p-2 rounded-lg bg-muted/30 dark:bg-muted/10">
+                      <p className="text-xs text-muted-foreground">Active</p>
+                      <p className="text-sm font-bold text-foreground">{taskBreakdown[1]?.percentage || 0}%</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:col-span-2 space-y-6">
+            {/* Quick actions */}
+            <div>
+              <h3 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-secondary/15 dark:bg-secondary/10">
+                  <Zap size={18} className="text-secondary" />
+                </div>
+                Quick Actions
+              </h3>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { href: "/dashboard/mission-logs", label: "Mission Logs", desc: "View all" },
+                  { href: "/dashboard/settings#bot", label: "Bot Config", desc: "Setup" },
+                  { href: "/dashboard/settings#health", label: "Profile Settings", desc: "Settings" },
+                ].map((action, i) => (
+                  <Link key={i} href={action.href}>
+                    <div className="group relative h-20 rounded-xl border border-border/40 dark:border-border/60 bg-card/50 dark:bg-card/30 backdrop-blur-sm p-4 hover:border-secondary/40 dark:hover:border-secondary/50 cursor-pointer transition-all hover:shadow-md active:scale-95">
+                      <p className="text-sm font-semibold text-foreground group-hover:text-secondary transition-colors">
+                        {action.label}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">{action.desc}</p>
+                      <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-secondary opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-amber-500/15 dark:bg-amber-500/10">
+                  <Calendar size={18} className="text-amber-500" />
+                </div>
+                Recent Tasks
+              </h3>
+              <div className="space-y-2 max-h-72 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+                {recentTasks.map((task) => (
+                  <div
+                    key={task.id}
+                    className="group flex items-center gap-3 p-4 rounded-xl border border-border/40 dark:border-border/60 bg-card/50 dark:bg-card/30 backdrop-blur-sm hover:border-primary/40 dark:hover:border-primary/50 hover:shadow-md transition-all"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={task.completed}
+                      onChange={() => handleToggleTask(task.id, task.completed)}
+                      className="w-5 h-5 rounded-md border-2 border-border accent-primary cursor-pointer transition-all"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className={`font-medium text-sm transition-all ${
+                          task.completed ? "line-through text-muted-foreground" : "text-foreground"
+                        }`}
+                      >
+                        {task.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{task.due}</p>
+                    </div>
+                    <span className="text-xs px-2.5 py-1 rounded-full bg-secondary/15 text-secondary border border-secondary/30">
+                      {task.tags || 'No tags'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+          <Link href="/dashboard/tasks">
+            <button className="w-full group relative overflow-hidden rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-semibold py-4 transition-all hover:shadow-lg hover:shadow-primary/50 active:scale-95 duration-300">
+              <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <span className="relative flex items-center justify-center gap-2">
+                <Zap size={18} />+ New Task
+              </span>
+            </button>
+          </Link>
+          <Link href="/dashboard/notes">
+            <button className="w-full group relative rounded-xl border border-border/40 dark:border-border/60 bg-card/50 dark:bg-card/30 text-foreground font-semibold py-4 backdrop-blur-sm hover:border-secondary/40 dark:hover:border-secondary/50 hover:shadow-md transition-all active:scale-95 duration-300">
+              <span className="flex items-center justify-center gap-2">
+                <BookMarked size={18} />+ New Note
+              </span>
+            </button>
+          </Link>
+        </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
