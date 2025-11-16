@@ -80,17 +80,33 @@ export const authApi = {
   },
 
   forgotPassword: async (data: { email: string }): Promise<{ message: string }> => {
-    return fetchWithAuth<{ message: string }>('/api/user/forgot-password', {
+    const response = await fetch(`${API_URL}/api/user/forgot-password`, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
+    
+    if (!response.ok) {
+      const error: ApiError = await response.json().catch(() => ({ error: 'An error occurred' }));
+      throw new Error(error.error || `HTTP error! status: ${response.status}`);
+    }
+    
+    return response.json();
   },
 
   resetPassword: async (data: { token: string; newPassword: string }): Promise<{ message: string }> => {
-    return fetchWithAuth<{ message: string }>('/api/user/reset-password', {
+    const response = await fetch(`${API_URL}/api/user/reset-password`, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
+    
+    if (!response.ok) {
+      const error: ApiError = await response.json().catch(() => ({ error: 'An error occurred' }));
+      throw new Error(error.error || `HTTP error! status: ${response.status}`);
+    }
+    
+    return response.json();
   },
 };
 
