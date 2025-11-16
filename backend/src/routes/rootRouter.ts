@@ -35,6 +35,7 @@ rootRouter.get('/user/me', async (req, res) => {
         id: true,
         name: true,
         email: true,
+        avatar: true,
         telegramBotToken: true,
         telegramChatId: true,
         discordBotToken: true,

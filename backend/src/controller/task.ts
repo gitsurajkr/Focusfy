@@ -196,7 +196,7 @@ const deleteTask = async (req: Request, res: Response) => {
       },
     });
 
-    res.status(204).json({
+    res.status(200).json({
       message: "Task deleted successfully"
     });
     // console.log("Deleted task with id:", id);
@@ -223,7 +223,7 @@ const deleteNote = async (req: Request, res: Response) => {
         userId
       },
     });
-    res.status(204).send();
+    res.status(200).json({ message: "Note deleted successfully" });
   } catch (error) {
     console.error("Error deleting note:", error);
     res.status(500).json({ error: "Failed to delete note" });
@@ -245,6 +245,7 @@ const updateProfile = async (req: Request, res: Response) => {
     const {
       name,
       email,
+      avatar,
       telegramBotToken,
       telegramChatId,
       discordBotToken,
@@ -257,6 +258,7 @@ const updateProfile = async (req: Request, res: Response) => {
     const updateData: any = {};
     if (name !== undefined) updateData.name = name;
     if (email !== undefined) updateData.email = email;
+    if (avatar !== undefined) updateData.avatar = avatar;
     if (telegramBotToken !== undefined) updateData.telegramBotToken = telegramBotToken;
     if (telegramChatId !== undefined) updateData.telegramChatId = telegramChatId;
     if (discordBotToken !== undefined) updateData.discordBotToken = discordBotToken;

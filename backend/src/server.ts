@@ -14,8 +14,8 @@ app.use(cors({
 app.use(express.json());
 
 // Routes
-app.use('/api/user', userRouter);  // User authentication routes
-app.use('/api', rootRouter);       // Protected application routes
+app.use('/api/user', userRouter); 
+app.use('/api', rootRouter);       
 
 // Health check
 app.get('/health', (req, res) => {
