@@ -2,7 +2,7 @@
 
 import type { User, Task, Note, AuthResponse, ApiError } from './types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 // Helper function to get auth token from localStorage
 const getAuthToken = (): string | null => {
