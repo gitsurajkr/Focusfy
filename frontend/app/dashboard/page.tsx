@@ -81,15 +81,15 @@ export default function DashboardPage() {
   }, [tasks])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 dark:from-background dark:via-background dark:to-muted/10">
-      <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
+    <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/30 dark:from-background dark:via-background dark:to-muted/10">
+      <div className="p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8 max-w-7xl mx-auto">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight">
+              <h1 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-foreground tracking-tight">
                 Welcome back, {user?.name || 'User'}
               </h1>
-              <p className="text-muted-foreground mt-3 text-lg">Here's your productivity snapshot for today</p>
+              <p className="text-muted-foreground mt-2 md:mt-3 text-sm md:text-base lg:text-lg">Here's your productivity snapshot for today</p>
             </div>
 
           </div>
@@ -101,23 +101,23 @@ export default function DashboardPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-5">
           {stats.map((stat, i) => (
             <div
               key={i}
-              className={`group relative overflow-hidden rounded-2xl border border-border/40 dark:border-border/60 backdrop-blur-sm hover:border-primary/40 dark:hover:border-primary/50 transition-all duration-300`}
+              className={`group relative overflow-hidden rounded-xl md:rounded-2xl border border-border/40 dark:border-border/60 backdrop-blur-sm hover:border-primary/40 dark:hover:border-primary/50 transition-all duration-300`}
             >
               <div
-                className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-50 dark:opacity-30 group-hover:opacity-75 transition-opacity`}
+                className={`absolute inset-0 bg-linear-to-br ${stat.color} opacity-50 dark:opacity-30 group-hover:opacity-75 transition-opacity`}
               />
-              <div className="relative p-6 space-y-4">
+              <div className="relative p-4 md:p-5 lg:p-6 space-y-3 md:space-y-4">
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-                    <p className="text-4xl font-bold text-foreground">{stat.value}</p>
+                    <p className="text-xs md:text-sm font-medium text-muted-foreground">{stat.label}</p>
+                    <p className="text-3xl md:text-4xl font-bold text-foreground">{stat.value}</p>
                   </div>
-                  <div className={`${stat.iconBg} p-3 rounded-xl group-hover:scale-110 transition-transform`}>
-                    <stat.icon size={24} className={stat.iconColor} />
+                  <div className={`${stat.iconBg} p-2 md:p-3 rounded-lg md:rounded-xl group-hover:scale-110 transition-transform`}>
+                    <stat.icon size={20} className={`${stat.iconColor} md:w-6 md:h-6`} />
                   </div>
                 </div>
               </div>
@@ -125,10 +125,10 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           <div className="lg:col-span-1">
-            <div className="group h-full rounded-2xl border border-border/40 dark:border-border/60 bg-card/50 dark:bg-card/30 backdrop-blur-sm hover:border-primary/40 dark:hover:border-primary/50 p-6 transition-all hover:shadow-premium">
-              <h3 className="text-base font-semibold text-foreground mb-6 flex items-center gap-2">
+            <div className="group h-full rounded-xl md:rounded-2xl border border-border/40 dark:border-border/60 bg-card/50 dark:bg-card/30 backdrop-blur-sm hover:border-primary/40 dark:hover:border-primary/50 p-4 md:p-5 lg:p-6 transition-all hover:shadow-premium">
+              <h3 className="text-sm md:text-base font-semibold text-foreground mb-4 md:mb-6 flex items-center gap-2">
                 <div className="p-2 rounded-lg bg-primary/15 dark:bg-primary/10">
                   <Target size={18} className="text-primary" />
                 </div>
@@ -236,24 +236,24 @@ export default function DashboardPage() {
           <div className="lg:col-span-2 space-y-6">
             {/* Quick actions */}
             <div>
-              <h3 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
+              <h3 className="text-sm md:text-base font-semibold text-foreground mb-3 md:mb-4 flex items-center gap-2">
                 <div className="p-2 rounded-lg bg-secondary/15 dark:bg-secondary/10">
-                  <Zap size={18} className="text-secondary" />
+                  <Zap size={16} className="text-secondary md:w-[18px] md:h-[18px]" />
                 </div>
                 Quick Actions
               </h3>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
                 {[
                   { href: "/dashboard/mission-logs", label: "Mission Logs", desc: "View all" },
                   { href: "/dashboard/settings#bot", label: "Bot Config", desc: "Setup" },
                   { href: "/dashboard/settings#health", label: "Profile Settings", desc: "Settings" },
                 ].map((action, i) => (
                   <Link key={i} href={action.href}>
-                    <div className="group relative h-20 rounded-xl border border-border/40 dark:border-border/60 bg-card/50 dark:bg-card/30 backdrop-blur-sm p-4 hover:border-secondary/40 dark:hover:border-secondary/50 cursor-pointer transition-all hover:shadow-md active:scale-95">
-                      <p className="text-sm font-semibold text-foreground group-hover:text-secondary transition-colors">
+                    <div className="group relative h-16 md:h-20 rounded-lg md:rounded-xl border border-border/40 dark:border-border/60 bg-card/50 dark:bg-card/30 backdrop-blur-sm p-3 md:p-4 hover:border-secondary/40 dark:hover:border-secondary/50 cursor-pointer transition-all hover:shadow-md active:scale-95">
+                      <p className="text-xs md:text-sm font-semibold text-foreground group-hover:text-secondary transition-colors line-clamp-1">
                         {action.label}
                       </p>
-                      <p className="text-xs text-muted-foreground mt-1">{action.desc}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 md:mt-1">{action.desc}</p>
                       <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-secondary opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
                   </Link>
@@ -262,9 +262,9 @@ export default function DashboardPage() {
             </div>
 
             <div>
-              <h3 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
+              <h3 className="text-sm md:text-base font-semibold text-foreground mb-3 md:mb-4 flex items-center gap-2">
                 <div className="p-2 rounded-lg bg-amber-500/15 dark:bg-amber-500/10">
-                  <Calendar size={18} className="text-amber-500" />
+                  <Calendar size={16} className="text-amber-500 md:w-[18px] md:h-[18px]" />
                 </div>
                 Recent Tasks
               </h3>
@@ -272,17 +272,17 @@ export default function DashboardPage() {
                 {recentTasks.map((task) => (
                   <div
                     key={task.id}
-                    className="group flex items-center gap-3 p-4 rounded-xl border border-border/40 dark:border-border/60 bg-card/50 dark:bg-card/30 backdrop-blur-sm hover:border-primary/40 dark:hover:border-primary/50 hover:shadow-md transition-all"
+                    className="group flex items-center gap-2 md:gap-3 p-3 md:p-4 rounded-lg md:rounded-xl border border-border/40 dark:border-border/60 bg-card/50 dark:bg-card/30 backdrop-blur-sm hover:border-primary/40 dark:hover:border-primary/50 hover:shadow-md transition-all"
                   >
                     <input
                       type="checkbox"
                       checked={task.completed}
                       onChange={() => handleToggleTask(task.id, task.completed)}
-                      className="w-5 h-5 rounded-md border-2 border-border accent-primary cursor-pointer transition-all"
+                      className="w-4 h-4 md:w-5 md:h-5 rounded-md border-2 border-border accent-primary cursor-pointer transition-all shrink-0"
                     />
                     <div className="flex-1 min-w-0">
                       <p
-                        className={`font-medium text-sm transition-all ${
+                        className={`font-medium text-xs md:text-sm transition-all truncate ${
                           task.completed ? "line-through text-muted-foreground" : "text-foreground"
                         }`}
                       >
@@ -290,7 +290,7 @@ export default function DashboardPage() {
                       </p>
                       <p className="text-xs text-muted-foreground mt-0.5">{task.due}</p>
                     </div>
-                    <span className="text-xs px-2.5 py-1 rounded-full bg-secondary/15 text-secondary border border-secondary/30">
+                    <span className="text-xs px-2 md:px-2.5 py-0.5 md:py-1 rounded-full bg-secondary/15 text-secondary border border-secondary/30 shrink-0 hidden sm:inline">
                       {task.tags || 'No tags'}
                     </span>
                   </div>
@@ -300,19 +300,19 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 pt-4">
           <Link href="/dashboard/tasks">
-            <button className="w-full group relative overflow-hidden rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-semibold py-4 transition-all hover:shadow-lg hover:shadow-primary/50 active:scale-95 duration-300">
+            <button className="w-full group relative overflow-hidden rounded-lg md:rounded-xl bg-linear-to-r from-primary to-primary/80 text-primary-foreground font-semibold py-3 md:py-4 transition-all hover:shadow-lg hover:shadow-primary/50 active:scale-95 duration-300 text-sm md:text-base">
               <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
               <span className="relative flex items-center justify-center gap-2">
-                <Zap size={18} />+ New Task
+                <Zap size={16} className="md:w-[18px] md:h-[18px]" />+ New Task
               </span>
             </button>
           </Link>
           <Link href="/dashboard/notes">
-            <button className="w-full group relative rounded-xl border border-border/40 dark:border-border/60 bg-card/50 dark:bg-card/30 text-foreground font-semibold py-4 backdrop-blur-sm hover:border-secondary/40 dark:hover:border-secondary/50 hover:shadow-md transition-all active:scale-95 duration-300">
+            <button className="w-full group relative rounded-lg md:rounded-xl border border-border/40 dark:border-border/60 bg-card/50 dark:bg-card/30 text-foreground font-semibold py-3 md:py-4 backdrop-blur-sm hover:border-secondary/40 dark:hover:border-secondary/50 hover:shadow-md transition-all active:scale-95 duration-300 text-sm md:text-base">
               <span className="flex items-center justify-center gap-2">
-                <BookMarked size={18} />+ New Note
+                <BookMarked size={16} className="md:w-[18px] md:h-[18px]" />+ New Note
               </span>
             </button>
           </Link>
