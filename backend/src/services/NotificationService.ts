@@ -256,158 +256,108 @@ class NotificationService {
     try {
       const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
       
-      const subject = '🔐 Focusfy - Password Reset Request';
+      const subject = 'Reset Your Focusfy Password';
       
       const htmlContent = `
         <!DOCTYPE html>
         <html>
         <head>
           <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Password Reset - Focusfy</title>
-          <style>
-            body { 
-              font-family: 'Courier New', monospace; 
-              background: linear-gradient(135deg, #181825, #232946);
-              margin: 0; 
-              padding: 20px;
-              color: #ffffff;
-            }
-            .container { 
-              max-width: 600px; 
-              margin: 0 auto; 
-              background: #181825; 
-              border: 3px solid #00ffff; 
-              border-radius: 8px;
-              padding: 30px;
-              box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
-            }
-            .header { 
-              text-align: center; 
-              margin-bottom: 30px; 
-              color: #00ffff;
-              text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
-            }
-            .logo { 
-              font-size: 24px; 
-              font-weight: bold; 
-              margin-bottom: 10px; 
-            }
-            .content { 
-              line-height: 1.6; 
-              margin-bottom: 30px; 
-            }
-            .reset-button { 
-              display: inline-block; 
-              background: linear-gradient(45deg, #00ffff, #0080ff); 
-              color: #000000; 
-              padding: 15px 30px; 
-              text-decoration: none; 
-              border-radius: 4px; 
-              font-weight: bold; 
-              font-family: 'Courier New', monospace;
-              border: 2px solid #00ffff;
-              box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
-            }
-            .reset-button:hover { 
-              background: linear-gradient(45deg, #0080ff, #00ffff); 
-            }
-            .warning { 
-              background: #4a1a1a; 
-              border: 1px solid #ff6b6b; 
-              padding: 15px; 
-              border-radius: 4px; 
-              margin: 20px 0; 
-              color: #ff9999;
-            }
-            .footer { 
-              text-align: center; 
-              font-size: 12px; 
-              color: #888; 
-              margin-top: 30px; 
-            }
-            .pixel-art { 
-              font-family: monospace; 
-              font-size: 14px; 
-              color: #00ffff; 
-            }
-          </style>
         </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <div class="logo">🎮 FOCUSFY</div>
-              <div class="pixel-art">Productivity • Gamified</div>
-            </div>
-            
-            <div class="content">
-              <h2 style="color: #00ffff;">Password Reset Request</h2>
-              
-              <p>Hello,</p>
-              
-              <p>We received a request to reset the password for your Focusfy account associated with <strong style="color: #00ffff;">${email}</strong>.</p>
-              
-              <p>Click the button below to reset your password:</p>
-              
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${resetUrl}" class="reset-button">🔐 RESET PASSWORD</a>
-              </div>
-              
-              <div class="warning">
-                <strong>⚠️ Important Security Information:</strong>
-                <ul>
-                  <li>This link will expire in <strong>1 hour</strong> for security</li>
-                  <li>If you didn't request this reset, you can safely ignore this email</li>
-                  <li>Your password will remain unchanged until you create a new one</li>
-                </ul>
-              </div>
-              
-              <p>If the button doesn't work, copy and paste this link into your browser:</p>
-              <p style="word-break: break-all; color: #00ffff; background: #232946; padding: 10px; border-radius: 4px;">
-                ${resetUrl}
-              </p>
-              
-              <p style="margin-top: 30px;">
-                Keep crafting your productivity!<br>
-                <strong style="color: #00ffff;">The Focusfy Team</strong> 🏰
-              </p>
-            </div>
-            
-            <div class="footer">
-              <p>This email was sent because a password reset was requested for your Focusfy account.</p>
-              <p>If you have any questions, please contact our support team.</p>
-              <div class="pixel-art" style="margin-top: 15px;">
-                ░░░░░░░░░░░░░░░░░░░░░░░░░<br>
-                ░ CRAFT YOUR PRODUCTIVITY ░<br>
-                ░    BLOCK BY BLOCK      ░<br>
-                ░░░░░░░░░░░░░░░░░░░░░░░░░
-              </div>
-            </div>
-          </div>
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 40px 20px;">
+            <tr>
+              <td align="center">
+                <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                  
+                  <!-- Header -->
+                  <tr>
+                    <td style="padding: 40px 40px 30px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                      <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">🔐 Focusfy</h1>
+                      <p style="margin: 8px 0 0; color: rgba(255,255,255,0.9); font-size: 14px;">Password Reset Request</p>
+                    </td>
+                  </tr>
+                  
+                  <!-- Content -->
+                  <tr>
+                    <td style="padding: 40px;">
+                      <p style="margin: 0 0 20px; color: #333333; font-size: 16px; line-height: 1.6;">Hello,</p>
+                      
+                      <p style="margin: 0 0 20px; color: #333333; font-size: 16px; line-height: 1.6;">We received a request to reset the password for your Focusfy account: <strong>${email}</strong></p>
+                      
+                      <p style="margin: 0 0 30px; color: #333333; font-size: 16px; line-height: 1.6;">Click the button below to reset your password:</p>
+                      
+                      <!-- Button -->
+                      <table width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td align="center" style="padding: 0 0 30px;">
+                            <a href="${resetUrl}" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">Reset Password</a>
+                          </td>
+                        </tr>
+                      </table>
+                      
+                      <!-- Warning Box -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px; margin-bottom: 30px;">
+                        <tr>
+                          <td style="padding: 16px;">
+                            <p style="margin: 0 0 8px; color: #856404; font-size: 14px; font-weight: 600;">⚠️ Important:</p>
+                            <ul style="margin: 0; padding-left: 20px; color: #856404; font-size: 14px; line-height: 1.6;">
+                              <li>This link expires in <strong>1 hour</strong></li>
+                              <li>If you didn't request this, ignore this email</li>
+                              <li>Your password won't change until you set a new one</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </table>
+                      
+                      <p style="margin: 0 0 10px; color: #666666; font-size: 14px;">Or copy and paste this link:</p>
+                      <p style="margin: 0 0 30px; padding: 12px; background-color: #f8f9fa; border-radius: 4px; color: #667eea; font-size: 13px; word-break: break-all; font-family: monospace;">${resetUrl}</p>
+                      
+                      <p style="margin: 0; color: #333333; font-size: 16px; line-height: 1.6;">Best regards,<br><strong>The Focusfy Team</strong></p>
+                    </td>
+                  </tr>
+                  
+                  <!-- Footer -->
+                  <tr>
+                    <td style="padding: 30px 40px; background-color: #f8f9fa; border-top: 1px solid #e9ecef;">
+                      <p style="margin: 0; color: #999999; font-size: 12px; text-align: center; line-height: 1.6;">
+                        This email was sent because a password reset was requested for your account.<br>
+                        If you have questions, contact our support team.
+                      </p>
+                    </td>
+                  </tr>
+                  
+                </table>
+              </td>
+            </tr>
+          </table>
         </body>
         </html>
       `;
 
       const textContent = `
- FOCUSFY - Password Reset Request
+FOCUSFY - Password Reset Request
 
 Hello,
 
-We received a request to reset the password for your Focusfy account associated with ${email}.
+We received a request to reset the password for your Focusfy account: ${email}
 
 Click the link below to reset your password:
 ${resetUrl}
 
-⚠️ Important Security Information:
-- This link will expire in 1 hour for security
-- If you didn't request this reset, you can safely ignore this email
-- Your password will remain unchanged until you create a new one
+⚠️ Important:
+- This link expires in 1 hour
+- If you didn't request this, ignore this email
+- Your password won't change until you set a new one
 
-Keep crafting your productivity!
-The Focusfy Team 🏰
+Best regards,
+The Focusfy Team
 
 ---
-This email was sent because a password reset was requested for your Focusfy account.
-If you have any questions, please contact our support team.
+This email was sent because a password reset was requested for your account.
+If you have questions, contact our support team.
       `;
 
       await this.gmailTransporter.sendMail({
