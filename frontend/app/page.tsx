@@ -3,10 +3,10 @@
 import type React from "react"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useAuth } from "@/contexts/AuthContext"
 import { Eye, EyeOff } from "lucide-react"
+import Image from "next/image"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -15,7 +15,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const { login } = useAuth()
-  const router = useRouter()
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,8 +30,12 @@ export default function LoginPage() {
     try {
       await login(email, password)
       // Navigation is handled in the AuthContext
-    } catch (err: any) {
-      setError(err.message || "Failed to sign in")
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError("Failed to sign in")
+      }
       setIsLoading(false)
     }
   }
@@ -48,11 +51,15 @@ export default function LoginPage() {
       <div className="relative w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-linear-to-br from-primary to-secondary rounded-xl mb-4">
-            <svg className="w-6 h-6 text-primary-foreground" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
-            </svg>
-          </div>
+            <div className="inline-flex items-center justify-center w-12 h-12 bg-linear-to-br from-primary to-secondary rounded-full mb-4 overflow-hidden">
+            <Image
+              src="/logof.png"
+              alt="logo"
+              width={48}
+              height={48}
+              className="object-cover w-full h-full rounded-full"
+            />
+            </div>
           <h1 className="text-2xl font-bold text-balance">Focusfy</h1>
           <p className="text-sm text-muted-foreground mt-1">Productivity Manager</p>
         </div>
@@ -133,7 +140,7 @@ export default function LoginPage() {
           </div>
 
           <p className="text-center text-sm text-muted-foreground">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link href="/signup" className="text-primary hover:text-primary/80 font-semibold transition-smooth">
               Create one
             </Link>

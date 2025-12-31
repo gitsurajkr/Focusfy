@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from "react"
 import { Plus, Search, Trash2, Edit2, Loader2 } from "lucide-react"
+import { motion } from 'framer-motion'
 import { useNotes } from "@/hooks/useNotes"
 
 export default function NotesPage() {
@@ -36,8 +37,8 @@ export default function NotesPage() {
       }
       setFormData({ title: "", content: "" })
       setShowNewNote(false)
-    } catch (err: any) {
-      alert(err.message)
+    } catch (err: unknown) {
+      alert((err as Error).message)
     } finally {
       setIsSubmitting(false)
     }
@@ -53,8 +54,8 @@ export default function NotesPage() {
     if (!confirm("Are you sure you want to delete this note?")) return
     try {
       await deleteNote(noteId)
-    } catch (err: any) {
-      alert(err.message)
+    } catch (err: unknown) {
+      alert((err as Error).message)
     }
   }
 
@@ -88,9 +89,27 @@ export default function NotesPage() {
 
       {/* Loading state */}
       {loading ? (
-        <div className="text-center py-12">
-          <Loader2 className="animate-spin mx-auto mb-4 text-primary" size={32} />
-          <p className="text-muted-foreground">Loading notes...</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mb-20 md:mb-8">
+          {[1,2,3,4,5,6].map(i => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.28, delay: i * 0.03 }}
+              className="bg-card border border-border rounded-xl p-3 md:p-4 hover:shadow-md transition-smooth flex flex-col min-h-[140px]"
+            >
+              <div className="flex items-start justify-between mb-2 gap-2">
+                <div className="h-4 bg-muted/30 rounded w-2/3 animate-pulse" />
+                <div className="h-3 bg-muted/20 rounded w-12 animate-pulse" />
+              </div>
+              <div className="flex-1">
+                <div className="h-16 bg-muted/20 rounded animate-pulse mb-3" />
+              </div>
+              <div className="text-xs text-muted-foreground mt-3 pt-3 border-t border-border">
+                <div className="h-3 bg-muted/20 rounded w-24 animate-pulse" />
+              </div>
+            </motion.div>
+          ))}
         </div>
       ) : error ? (
         <div className="text-center py-12">

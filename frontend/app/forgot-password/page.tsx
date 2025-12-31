@@ -27,8 +27,8 @@ export default function ForgotPasswordPage() {
       await authApi.forgotPassword({ email })
       setSuccess(true)
       setEmail("")
-    } catch (err: any) {
-      setError(err.message || "Failed to send reset email")
+    } catch (err: unknown) {
+      setError((err as Error).message || "Failed to send reset email")
     } finally {
       setIsLoading(false)
     }
@@ -59,7 +59,7 @@ export default function ForgotPasswordPage() {
           </div>
           <h1 className="text-2xl font-bold">Forgot Password?</h1>
           <p className="text-sm text-muted-foreground mt-2">
-            No worries, we'll send you reset instructions
+            No worries, we&apos;ll send you reset instructions
           </p>
         </div>
 

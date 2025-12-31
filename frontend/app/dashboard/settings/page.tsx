@@ -4,6 +4,7 @@ import { useState, useEffect, FormEvent, useRef } from "react"
 import { Save, MessageCircle, Mail, Loader2, Upload, X, CheckCircle, XCircle, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from "@/contexts/AuthContext"
 import { profileApi, authApi } from "@/lib/api"
+import Image from "next/image"
 
 export default function SettingsPage() {
   const { user, refreshUser } = useAuth()
@@ -77,20 +78,20 @@ export default function SettingsPage() {
     }
   }
 
-  const handleSaveAvatar = async () => {
-    setIsSubmitting(true)
-    setError("")
-    try {
-      await profileApi.updateProfile({ avatar: avatarPreview || "" })
-      await refreshUser()
-      setSavedMessage(true)
-      setTimeout(() => setSavedMessage(false), 3000)
-    } catch (err: any) {
-      setError(err.message || "Failed to save avatar")
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+  // const handleSaveAvatar = async () => {
+  //   setIsSubmitting(true)
+  //   setError("")
+  //   try {
+  //     await profileApi.updateProfile({ avatar: avatarPreview || "" })
+  //     await refreshUser()
+  //     setSavedMessage(true)
+  //     setTimeout(() => setSavedMessage(false), 3000)
+  //   } catch (err: any) {
+  //     setError(err.message || "Failed to save avatar")
+  //   } finally {
+  //     setIsSubmitting(false)
+  //   }
+  // }
 
   const handleSaveProfile = async (e: FormEvent) => {
     e.preventDefault()
@@ -101,8 +102,12 @@ export default function SettingsPage() {
       await refreshUser()
       setSavedMessage(true)
       setTimeout(() => setSavedMessage(false), 3000)
-    } catch (err: any) {
-      setError(err.message || "Failed to save profile")
+    } catch (err: unknown) {
+      if (err && typeof err === "object" && "message" in err && typeof (err as { message?: string }).message === "string") {
+        setError((err as { message: string }).message)
+      } else {
+        setError("Failed to save profile")
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -125,8 +130,12 @@ export default function SettingsPage() {
       setPasswordData({ currentPassword: "", newPassword: "" })
       setSavedMessage(true)
       setTimeout(() => setSavedMessage(false), 3000)
-    } catch (err: any) {
-      setError(err.message || "Failed to change password")
+    } catch (err: unknown) {
+      if (err && typeof err === "object" && "message" in err && typeof (err as { message?: string }).message === "string") {
+        setError((err as { message: string }).message)
+      } else {
+        setError("Failed to save profile")
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -148,11 +157,14 @@ export default function SettingsPage() {
       }
       
       setTestResults({ ...testResults, [botType]: 'success' })
-    } catch (err: any) {
-      setTestResults({ ...testResults, [botType]: 'error' })
-      setError(err.message || `Failed to test ${botType}`)
+    } catch (err: unknown) {
+      if (err && typeof err === "object" && "message" in err && typeof (err as { message?: string }).message === "string") {
+        setError((err as { message: string }).message)
+      } else {
+        setError("Failed to save profile")
+      }
     } finally {
-      setTestingBot(null)
+      setIsSubmitting(false)
     }
   }
 
@@ -206,7 +218,7 @@ export default function SettingsPage() {
               <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6">
                 <div className="relative group">
                   {avatarPreview ? (
-                    <img
+                    <Image
                       src={avatarPreview}
                       alt="Avatar preview"
                       className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border-2 border-primary/20"
@@ -227,7 +239,7 @@ export default function SettingsPage() {
                   )}
                 </div>
 
-                <div className="flex flex-col gap-2 w-full sm:w-auto">
+                {/* <div className="flex flex-col gap-2 w-full sm:w-auto">
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     type="button"
@@ -264,7 +276,7 @@ export default function SettingsPage() {
                     </button>
                   )}
                   <p className="text-xs text-muted-foreground">JPG, PNG up to 5MB</p>
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -404,7 +416,7 @@ export default function SettingsPage() {
                   <button
                     type="button"
                     onClick={() => setShowHelp(false)}
-                    className="text-sm text-muted-foreground hover:text-foreground hover:text-red-400 transition-all"
+                    className="text-sm text-muted-foreground hover:text-red-400 transition-all"
                   >
                     ✕ Close
                   </button>

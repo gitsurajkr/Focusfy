@@ -1,5 +1,5 @@
 import type React from "react"
-import { Geist, Geist_Mono } from "next/font/google"
+import { Geist } from "next/font/google"
 import { ThemeProvider } from "./components/theme-provider"
 import { AuthProvider } from "@/contexts/AuthContext"
 import { Analytics } from "@vercel/analytics/next"
@@ -7,9 +7,6 @@ import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
 const geist = Geist({ subsets: ["latin"] })
-const geistMono = Geist_Mono({ subsets: ["latin"] })
-
-// ... existing metadata ...
 
 export default function RootLayout({
   children,

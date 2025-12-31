@@ -1,13 +1,14 @@
 "use client"
 
-import { CheckCircle2, BookMarked, Zap, Calendar, Target, ArrowUpRight, TrendingUp } from 'lucide-react'
+import { CheckCircle2, BookMarked, Zap, Calendar, Target } from 'lucide-react'
 import Link from "next/link"
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts"
 import { useTasks } from "@/hooks/useTasks"
 import { useNotes } from "@/hooks/useNotes"
 import { useAuth } from "@/contexts/AuthContext"
 import { useMemo } from "react"
 import { taskApi } from "@/lib/api"
+import { motion } from 'framer-motion'
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -80,31 +81,70 @@ export default function DashboardPage() {
       }))
   }, [tasks])
 
+  const containerVariants = {
+    hidden: { opacity: 0, y: 6 },
+    show: { opacity: 1, y: 0, transition: { staggerChildren: 0.04, delayChildren: 0.06 } }
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 8 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.28 } }
+  }
+
   return (
     <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/30 dark:from-background dark:via-background dark:to-muted/10">
-      <div className="p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8 max-w-7xl mx-auto">
-        <div className="space-y-2">
+      <motion.div variants={containerVariants} initial="hidden" animate="show" className="p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8 max-w-7xl mx-auto">
+        <motion.div variants={itemVariants} className="space-y-2">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-foreground tracking-tight">
                 Welcome back, {user?.name || 'User'}
               </h1>
-              <p className="text-muted-foreground mt-2 md:mt-3 text-sm md:text-base lg:text-lg">Here's your productivity snapshot for today</p>
+              <p className="text-muted-foreground mt-2 md:mt-3 text-sm md:text-base lg:text-lg">Here&apos;s your productivity snapshot for today</p>
             </div>
-
           </div>
-        </div>
+        </motion.div>
 
         {(tasksLoading || notesLoading) ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Loading your data...</p>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+              {[1,2,3].map(i => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.28, delay: i * 0.03 }}
+                  className="relative overflow-hidden rounded-xl md:rounded-2xl border border-border/40 bg-card/50 p-4 md:p-5 lg:p-6"
+                >
+                  <div className="h-6 bg-muted/30 rounded w-1/3 mb-3 animate-pulse" />
+                  <div className="h-10 bg-muted/20 rounded w-1/2 animate-pulse" />
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+              <div className="lg:col-span-1">
+                <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{duration:0.3}} className="h-64 bg-card/50 border border-border/40 rounded-xl p-4 animate-pulse" />
+              </div>
+
+              <div className="lg:col-span-2 space-y-6">
+                <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{duration:0.3}} className="space-y-3">
+                  {[1,2,3].map(i => (
+                    <div key={i} className="h-14 bg-card/50 border border-border/40 rounded-lg p-3 animate-pulse" />
+                  ))}
+                </motion.div>
+              </div>
+            </div>
           </div>
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-5">
           {stats.map((stat, i) => (
-            <div
+            <motion.div
               key={i}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.28, delay: i * 0.02 }}
               className={`group relative overflow-hidden rounded-xl md:rounded-2xl border border-border/40 dark:border-border/60 backdrop-blur-sm hover:border-primary/40 dark:hover:border-primary/50 transition-all duration-300`}
             >
               <div
@@ -121,10 +161,10 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
-
+          
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           <div className="lg:col-span-1">
             <div className="group h-full rounded-xl md:rounded-2xl border border-border/40 dark:border-border/60 bg-card/50 dark:bg-card/30 backdrop-blur-sm hover:border-primary/40 dark:hover:border-primary/50 p-4 md:p-5 lg:p-6 transition-all hover:shadow-premium">
@@ -244,7 +284,7 @@ export default function DashboardPage() {
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
                 {[
-                  { href: "/dashboard/mission-logs", label: "Mission Logs", desc: "View all" },
+                  { href: "/dashboard/tasks-logs", label: "Tasks Logs", desc: "View all" },
                   { href: "/dashboard/settings#bot", label: "Bot Config", desc: "Setup" },
                   { href: "/dashboard/settings#health", label: "Profile Settings", desc: "Settings" },
                 ].map((action, i) => (
@@ -269,9 +309,12 @@ export default function DashboardPage() {
                 Recent Tasks
               </h3>
               <div className="space-y-2 max-h-72 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
-                {recentTasks.map((task) => (
-                  <div
+                {recentTasks.map((task, idx) => (
+                  <motion.div
                     key={task.id}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.22, delay: idx * 0.02 }}
                     className="group flex items-center gap-2 md:gap-3 p-3 md:p-4 rounded-lg md:rounded-xl border border-border/40 dark:border-border/60 bg-card/50 dark:bg-card/30 backdrop-blur-sm hover:border-primary/40 dark:hover:border-primary/50 hover:shadow-md transition-all"
                   >
                     <input
@@ -293,7 +336,7 @@ export default function DashboardPage() {
                     <span className="text-xs px-2 md:px-2.5 py-0.5 md:py-1 rounded-full bg-secondary/15 text-secondary border border-secondary/30 shrink-0 hidden sm:inline">
                       {task.tags || 'No tags'}
                     </span>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
@@ -319,7 +362,8 @@ export default function DashboardPage() {
         </div>
           </>
         )}
-      </div>
+      </motion.div>
+      
     </div>
   )
 }

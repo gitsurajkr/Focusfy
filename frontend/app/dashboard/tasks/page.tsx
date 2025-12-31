@@ -3,6 +3,7 @@
 import { useState, FormEvent } from "react"
 import { Plus, Edit2, Trash2, X, Loader2, Calendar, Bell, Repeat } from 'lucide-react'
 import { useTasks } from "@/hooks/useTasks"
+import { motion } from "framer-motion"
 
 export default function TasksPage() {
   const { tasks, loading, error, addTask, updateTask, deleteTask: removeTask } = useTasks()
@@ -71,8 +72,8 @@ export default function TasksPage() {
         channels: { telegram: false, discord: false, gmail: false },
       })
       setShowTaskForm(false)
-    } catch (err: any) {
-      alert(err.message)
+    } catch (err: unknown) {
+      alert((err as Error).message)
     } finally {
       setIsSubmitting(false)
     }
@@ -118,16 +119,16 @@ export default function TasksPage() {
       await removeTask(deleteTaskId)
       setShowDeleteConfirm(false)
       setDeleteTaskId(null)
-    } catch (err: any) {
-      alert(err.message)
+    } catch (err: unknown) {
+      alert((err as Error).message)
     }
   }
 
   const handleToggleCompleted = async (task: typeof tasks[0]) => {
     try {
       await updateTask(task.id, { completed: !task.completed })
-    } catch (err: any) {
-      alert(err.message)
+    } catch (err: unknown) {
+      alert((err as Error).message)
     }
   }
 
@@ -137,7 +138,7 @@ export default function TasksPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground tracking-tight">Missions</h1>
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground tracking-tight">Tasks</h1>
             <p className="text-muted-foreground mt-2 text-sm md:text-base lg:text-lg">Manage your tasks and objectives</p>
           </div>
           <button
@@ -159,16 +160,35 @@ export default function TasksPage() {
             className="w-full sm:w-auto px-4 md:px-6 py-2.5 md:py-3 bg-linear-to-r from-primary to-secondary text-primary-foreground rounded-lg hover:shadow-lg transition-smooth flex items-center justify-center gap-2 font-semibold text-sm md:text-base"
           >
             <Plus size={18} className="md:w-5 md:h-5" />
-            <span className="hidden xs:inline">Create Mission</span>
+            <span className="hidden xs:inline">Create Task</span>
             <span className="xs:hidden">New</span>
           </button>
         </div>
 
         {/* Loading and Error States */}
         {loading && (
-          <div className="text-center py-12">
-            <Loader2 className="animate-spin mx-auto mb-4" size={32} />
-            <p className="text-muted-foreground">Loading missions...</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 py-6">
+            {[1,2,3,4,5,6].map((i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: i * 0.03 }}
+                className="bg-card/50 backdrop-blur-sm border border-border/30 rounded-xl p-4 md:p-6"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-5 h-5 rounded-full bg-muted/30 animate-pulse" />
+                  <div className="flex-1 space-y-3">
+                    <div className="h-4 bg-muted/30 rounded w-3/4 animate-pulse" />
+                    <div className="h-3 bg-muted/20 rounded w-1/2 animate-pulse" />
+                    <div className="flex gap-2 mt-2">
+                      <div className="h-6 w-16 bg-muted/20 rounded animate-pulse" />
+                      <div className="h-6 w-12 bg-muted/20 rounded animate-pulse" />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
         )}
 
@@ -180,17 +200,22 @@ export default function TasksPage() {
 
         {/* Task List */}
         {!loading && !error && (
+          
           <div className="grid grid-cols-1 gap-4">
             {(tasks || []).length === 0 ? (
               <div className="text-center py-16 bg-card/30 rounded-2xl border border-border/40">
                 <Calendar size={64} className="mx-auto mb-4 text-muted-foreground opacity-50" />
-                <h3 className="text-xl font-semibold text-foreground mb-2">No missions yet</h3>
-                <p className="text-muted-foreground">Create your first mission to get started!</p>
+                <h3 className="text-xl font-semibold text-foreground mb-2">No tasks yet</h3>
+                <p className="text-muted-foreground">Create your first task to get started!</p>
               </div>
             ) : (
               (tasks || []).map((task) => (
-                <div
+                <motion.div
                   key={task.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                  transition={{ duration: 0.22 }}
                   className="group bg-card/50 backdrop-blur-sm border border-border/40 rounded-xl p-4 md:p-6 hover:border-primary/40 transition-all"
                 >
                   <div className="flex items-start justify-between gap-2 md:gap-4">
@@ -297,7 +322,8 @@ export default function TasksPage() {
                       </button>
                     </div>
                   </div>
-                </div>
+                  </motion.div>               
+                
               ))
             )}
           </div>
@@ -309,7 +335,7 @@ export default function TasksPage() {
             <div className="bg-card border border-border rounded-2xl p-4 md:p-6 lg:p-8 w-full max-w-2xl max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-foreground">
-                  {editingTask ? "Edit Mission" : "Create Mission"}
+                  {editingTask ? "Edit Task" : "Create Task"}
                 </h2>
                 <button
                   onClick={() => {
@@ -326,13 +352,13 @@ export default function TasksPage() {
                 {/* Quest Name */}
                 <div>
                   <label className="block text-sm font-semibold text-foreground mb-2">
-                    Mission Name:
+                    Task Name:
                   </label>
                   <input
                     type="text"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="Enter your mission..."
+                    placeholder="Enter your task..."
                     className="w-full px-4 py-3 bg-background border-2 border-primary/40 rounded-lg text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none transition-smooth"
                     required
                   />
@@ -341,7 +367,7 @@ export default function TasksPage() {
                 {/* Quest Type */}
                 <div>
                   <label className="block text-sm font-semibold text-foreground mb-2">
-                    Mission Type:
+                    Task Type:
                   </label>
                   <select
                     value={formData.type}
@@ -500,7 +526,7 @@ export default function TasksPage() {
                         Saving...
                       </>
                     ) : (
-                      <>{editingTask ? "Update Mission" : "Create Mission"}</>
+                      <>{editingTask ? "Update Task" : "Create Task"}</>
                     )}
                   </button>
                 </div>
@@ -513,9 +539,9 @@ export default function TasksPage() {
         {showDeleteConfirm && (
           <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div className="bg-card border border-border rounded-2xl p-8 w-full max-w-md">
-              <h3 className="text-xl font-bold text-foreground mb-4">Delete Mission?</h3>
+              <h3 className="text-xl font-bold text-foreground mb-4">Delete Task?</h3>
               <p className="text-muted-foreground mb-6">
-                Are you sure you want to delete this mission? This action cannot be undone.
+                Are you sure you want to delete this task? This action cannot be undone.
               </p>
               <div className="flex gap-4">
                 <button
