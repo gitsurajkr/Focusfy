@@ -248,13 +248,19 @@ class NotificationService {
 
   // Password Reset Email Method
   async sendPasswordResetEmail(email: string, resetToken: string): Promise<boolean> {
+    console.log('[NotificationService] 📧 sendPasswordResetEmail called for:', email);
+    
     if (!this.gmailTransporter) {
-      console.error('Gmail transporter not available for password reset email');
+      console.error('[NotificationService] ❌ Gmail transporter not available - email notifications disabled');
+      console.error('[NotificationService] Please check GMAIL_USER and GMAIL_APP_PASSWORD environment variables');
       return false;
     }
+    
+    console.log('[NotificationService] ✅ Gmail transporter available, preparing email...');
 
     try {
       const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+      console.log('[NotificationService] 🔗 Reset URL generated:', resetUrl.replace(resetToken, 'TOKEN_HIDDEN'));
       
       const subject = 'Reset Your Focusfy Password';
       
@@ -360,6 +366,10 @@ This email was sent because a password reset was requested for your account.
 If you have questions, contact our support team.
       `;
 
+      console.log('[NotificationService] 📤 Sending email via Gmail SMTP...');
+      console.log('[NotificationService] From:', this.gmailUser);
+      console.log('[NotificationService] To:', email);
+      
       await this.gmailTransporter.sendMail({
         from: `"Focusfy Productivity" <${this.gmailUser}>`,
         to: email,
@@ -368,10 +378,15 @@ If you have questions, contact our support team.
         html: htmlContent
       });
 
-      // console.log('Password reset email sent successfully to:', email);
+      console.log('[NotificationService] ✅ Password reset email sent successfully to:', email);
       return true;
     } catch (error) {
-      console.error('Failed to send password reset email:', error);
+      console.error('[NotificationService] ❌ Failed to send password reset email:', error);
+      if (error instanceof Error) {
+        console.error('[NotificationService] Error name:', error.name);
+        console.error('[NotificationService] Error message:', error.message);
+        console.error('[NotificationService] Error stack:', error.stack);
+      }
       return false;
     }
   }

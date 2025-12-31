@@ -256,10 +256,12 @@ const ForgotPassword = async (req: Request, res: Response) => {
     const parseResult = forgotPasswordZodSchema.safeParse(req.body);
     
     if (!parseResult.success) {
+        console.log('[ForgotPassword] ❌ Validation failed - Email is required');
         return res.status(400).json({ error: "Email is required" });
     }
 
     const { email } = parseResult.data;
+    console.log('[ForgotPassword] 📧 Password reset request received for:', email);
 
     try {
         // Check if user exists
@@ -268,12 +270,16 @@ const ForgotPassword = async (req: Request, res: Response) => {
         });
 
         if (!user) {
+            console.log('[ForgotPassword] ⚠️ User not found for email:', email, '(returning generic message)');
             return res.json({ message: "If the email exists, a reset link has been sent" });
         }
+        
+        console.log('[ForgotPassword] ✅ User found, generating reset token...');
 
         // Generate reset token
         const resetToken = crypto.randomBytes(32).toString('hex');
         const resetTokenExpires = new Date(Date.now() + 3600000); // 1 hour from now
+        console.log('[ForgotPassword] 🔑 Token generated, expires at:', resetTokenExpires.toISOString());
 
         // Save reset token to database
         await prisma.user.update({
@@ -283,18 +289,31 @@ const ForgotPassword = async (req: Request, res: Response) => {
                 resetTokenExpires
             }
         });
+        console.log('[ForgotPassword] 💾 Reset token saved to database');
 
-        const emailSent = await NotificationService.sendPasswordResetEmail(email, resetToken);
+        // Send email in background (non-blocking)
+        console.log('[ForgotPassword] 📤 Attempting to send password reset email...');
+        NotificationService.sendPasswordResetEmail(email, resetToken)
+            .then(emailSent => {
+                if (!emailSent) {
+                    console.error('[ForgotPassword] ❌ Failed to send password reset email to:', email);
+                } else {
+                    console.log('[ForgotPassword] ✅ Password reset email sent successfully to:', email);
+                }
+            })
+            .catch(error => {
+                console.error('[ForgotPassword] ❌ Error sending password reset email:', error);
+                console.error('[ForgotPassword] Error details:', error instanceof Error ? error.message : error);
+            });
         
-        if (!emailSent) {
-            console.error('Failed to send password reset email to:', email);
-        }
-        
+        // Respond immediately without waiting for email
+        console.log('[ForgotPassword] 📨 Sending response to client (email sending in background)');
         res.json({ 
             message: "If the email exists, a reset link has been sent"
         });
     } catch (error) {
-        console.error("Error in forgot password:", error);
+        console.error('[ForgotPassword] ❌ Error in forgot password process:', error);
+        console.error('[ForgotPassword] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
         res.status(500).json({ error: "Internal server error" });
     }
 };

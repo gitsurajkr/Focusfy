@@ -11,7 +11,8 @@ app.use(cors({
   origin: ['http://localhost:3000', 'https://afocusfy.vercel.app'],
   credentials: true
 }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Routes
 app.use('/api/user', userRouter); 
@@ -30,8 +31,6 @@ app.get('/health', (req, res) => {
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
-    console.log(`Minecraft Productivity Server is running on port ${PORT}`);
-    console.log(`Telegram Bot: ${process.env.TELEGRAM_BOT_TOKEN ? 'Configured' : 'Not configured'}`);
-    console.log(`Discord Bot: ${process.env.DISCORD_BOT_TOKEN ? 'Configured' : 'Not configured'}`);
-    console.log(`Gmail Service: ${process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD ? 'Configured' : 'Not configured'}`);
+    console.log(`Productivity Server is running on port ${PORT}`);
+  
 });
