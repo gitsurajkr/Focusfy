@@ -3,6 +3,7 @@ import cors from 'cors';
 import { rootRouter } from './routes/rootRouter';
 import { userRouter } from './routes/userRouter';
 import './services/SchedulerService'; // Initialize scheduler
+import 'dotenv/config';
 
 const app = express();
 
@@ -30,7 +31,8 @@ app.get('/health', (req, res) => {
 
 const PORT = process.env.PORT || 3001;
 
+// Debug logging for EC2 troubleshooting
+
 app.listen(PORT, () => {
-    console.log(`Productivity Server is running on port ${PORT}`);
-  
+    // Server started
 });

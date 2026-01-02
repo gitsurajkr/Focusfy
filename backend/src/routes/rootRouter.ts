@@ -158,19 +158,22 @@ rootRouter.post('/test-notification/:taskId', async (req, res) => {
 
 // Test Gmail endpoint
 rootRouter.post('/test-gmail', async (req: express.Request, res: express.Response) => {
-  try {
+    try {
     const userId = req.user?.userId;
     if (!userId) {
       return res.status(401).json({ message: 'Authentication required' });
     }
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
+    
     if (!user || !user.gmailTo) {
-      return res.status(400).json({ message: 'No user found or Gmail recipient not configured. Please configure Gmail in settings.' });
+      return res.status(400).json({ message: 'No user found or Gmail recipient not configured. Please configure Gmail in settings.' } );
     }
 
+    const startTime = Date.now();
+    
     await notificationService.sendUserNotification({
-      message: 'This is a test notification from your task app! 📧',
+      message: 'This is a test notification from your task app! 📧\n\nIf you received this email, your Gmail integration is working correctly on EC2! 🎉',
       taskTitle: 'Test Notification',
       taskType: 'NORMAL',
       channels: ['gmail'],
@@ -182,10 +185,20 @@ rootRouter.post('/test-gmail', async (req: express.Request, res: express.Respons
         gmailTo: user.gmailTo,
       },
     });
+    
+    const endTime = Date.now();
 
-    res.json({ message: `Gmail test sent successfully to ${user.gmailTo}!` });
+    res.json({ message: `Gmail test sent successfully to ${user.gmailTo}! Check your inbox.` });
   } catch (error) {
-    console.error('Gmail test error:', error);
+    console.error('❌ Gmail test error:', error);
+    console.error('🧪 DEBUG: Full error details:', error instanceof Error ? {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      code: (error as any).code,
+      errno: (error as any).errno,
+      syscall: (error as any).syscall
+    } : error);
     res.status(500).json({ message: `Gmail test failed: ${error instanceof Error ? error.message : 'Unknown error'}` });
   }
 });

@@ -42,8 +42,6 @@ class NotificationService {
     this.gmailUser = user || '';
 
     if (!user || !appPassword) {
-      console.warn('Gmail credentials not provided. Email notifications disabled.');
-      console.warn('Set GMAIL_USER and GMAIL_APP_PASSWORD environment variables');
       return;
     }
 
@@ -53,18 +51,17 @@ class NotificationService {
         auth: {
           user: user,
           pass: appPassword 
-        }
+        },
+        debug: true, // Enable SMTP debug
+        logger: true // Enable logging
       });
 
       // Test the connection
       if (this.gmailTransporter) {
         await this.gmailTransporter.verify();
-        console.log('Gmail transporter initialized and verified');
       }
     } catch (error) {
-      console.error('Failed to initialize Gmail transporter:', error);
-      console.warn('Make sure to use App Password, not regular Gmail password');
-      console.warn('Enable 2FA and generate App Password at: https://myaccount.google.com/apppasswords');
+      // Swallow errors silently in production
     }
   }
 
@@ -188,8 +185,8 @@ class NotificationService {
   }
 
   private async sendUserGmailNotification(payload: UserNotificationPayload): Promise<boolean> {
+   
     if (!this.gmailTransporter || !payload.userSettings.gmailTo) {
-      // console.log('User Gmail not configured or transporter not available, skipping notification');
       return false;
     }
 
@@ -202,18 +199,29 @@ class NotificationService {
         channels: payload.channels
       });
 
-      await this.gmailTransporter.sendMail({
+      const startTime = Date.now();
+      const result = await this.gmailTransporter.sendMail({
         from: `"Focusfy Productivity" <${this.gmailUser}>`,
         to: payload.userSettings.gmailTo,
         subject: subject,
         text: message,
         html: `<pre style="font-family: 'Courier New', monospace; background: #f0f0f0; padding: 10px; border-radius: 5px;">${message}</pre>`
       });
+      const endTime = Date.now();
 
-      // console.log('User Gmail notification sent to:', payload.userSettings.gmailTo);
       return true;
     } catch (error) {
-      console.error('Failed to send user Gmail notification:', error);
+      console.error('❌ Failed to send user Gmail notification:', error);
+      console.error('📧 DEBUG: Error details:', error instanceof Error ? {
+        message: error.message,
+        code: (error as any).code,
+        errno: (error as any).errno,
+        syscall: (error as any).syscall,
+        hostname: (error as any).hostname,
+        command: (error as any).command,
+        response: (error as any).response,
+        responseCode: (error as any).responseCode
+      } : error);
       return false;
     }
   }
@@ -248,19 +256,14 @@ class NotificationService {
 
   // Password Reset Email Method
   async sendPasswordResetEmail(email: string, resetToken: string): Promise<boolean> {
-    console.log('[NotificationService] 📧 sendPasswordResetEmail called for:', email);
     
     if (!this.gmailTransporter) {
-      console.error('[NotificationService] ❌ Gmail transporter not available - email notifications disabled');
-      console.error('[NotificationService] Please check GMAIL_USER and GMAIL_APP_PASSWORD environment variables');
       return false;
     }
     
-    console.log('[NotificationService] ✅ Gmail transporter available, preparing email...');
 
     try {
       const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
-      console.log('[NotificationService] 🔗 Reset URL generated:', resetUrl.replace(resetToken, 'TOKEN_HIDDEN'));
       
       const subject = 'Reset Your Focusfy Password';
       
@@ -365,11 +368,6 @@ The Focusfy Team
 This email was sent because a password reset was requested for your account.
 If you have questions, contact our support team.
       `;
-
-      console.log('[NotificationService] 📤 Sending email via Gmail SMTP...');
-      console.log('[NotificationService] From:', this.gmailUser);
-      console.log('[NotificationService] To:', email);
-      
       await this.gmailTransporter.sendMail({
         from: `"Focusfy Productivity" <${this.gmailUser}>`,
         to: email,
@@ -378,7 +376,6 @@ If you have questions, contact our support team.
         html: htmlContent
       });
 
-      console.log('[NotificationService] ✅ Password reset email sent successfully to:', email);
       return true;
     } catch (error) {
       console.error('[NotificationService] ❌ Failed to send password reset email:', error);
