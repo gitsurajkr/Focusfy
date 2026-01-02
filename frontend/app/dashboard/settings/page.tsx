@@ -146,25 +146,25 @@ export default function SettingsPage() {
     setTestResults({ ...testResults, [botType]: null })
     
     try {
-      let response: { message: string }
-      
       if (botType === 'telegram') {
-        response = await profileApi.testTelegram()
+        await profileApi.testTelegram()
       } else if (botType === 'discord') {
-        response = await profileApi.testDiscord()
+        await profileApi.testDiscord()
       } else {
-        response = await profileApi.testGmail()
+        await profileApi.testGmail()
       }
       
       setTestResults({ ...testResults, [botType]: 'success' })
+      setError('') // Clear any previous errors
     } catch (err: unknown) {
+      setTestResults({ ...testResults, [botType]: 'error' })
       if (err && typeof err === "object" && "message" in err && typeof (err as { message?: string }).message === "string") {
         setError((err as { message: string }).message)
       } else {
-        setError("Failed to save profile")
+        setError(`Failed to test ${botType} connection`)
       }
     } finally {
-      setIsSubmitting(false)
+      setTestingBot(null)
     }
   }
 
